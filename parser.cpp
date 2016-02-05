@@ -1,28 +1,22 @@
 #include "parser.h"
-#include "maintoken.h"
+#include "tree.h"
 #include <boost/tokenizer.hpp>
 #include <time.h>
 
-bool Parser::link()
-{
-
+void Parser::link()
+{//links all custom tokens whith their trees
     for(const auto &p:customTokenTrees_){
         auto customTokensList = p.second->getCustomTokensList();
         for(auto &p:customTokensList){
             p->setMain(customTokenTrees_.at(p->name()));
         }
-
     }
-
-    return true;
 }
 
 Parser::Parser()
 {
     srand(clock());
-    BaseToken::ConcatenationDepth = 5;
-    BaseToken::FigureBraceRepeatCount = 5;
-    BaseToken::RecursionDepth = 5;
+    setMainTokenName("main");
 }
 
 Parser &Parser::getParser()
@@ -31,70 +25,58 @@ Parser &Parser::getParser()
     return p;
 }
 
-Parser::~Parser()
-{
-    // delete customTokenTrees_["main"];
-}
 
-bool Parser::customParse(const string &expr)
+void Parser::parse(const string &expr)
 {
     customTokenTrees_.clear();
-    customTokens_.clear();
-    if(!tokenize(expr)) throw logic_error("Syntax error");
-    for(const auto &p:customTokens_){
-        std::shared_ptr<MainToken> mt = std::make_shared<MainToken>();
+    customTokenStrings_.clear();
+    tokenize(expr);
+    for(const auto &p:customTokenStrings_){
+        std::shared_ptr<Tree> mt = std::make_shared<Tree>();
         mt->buildTree(p.second);
         customTokenTrees_.insert(make_pair(p.first,mt));
     }
-    return link();
-
-
+    link();
+    
+    
 }
 
-bool Parser::tokenize(const string &expr)
+void Parser::tokenize(const string &expr)
 {
-    if(expr.empty()) throw logic_error("empty input");
     using namespace boost;
-    typedef tokenizer<boost::char_separator<char> >
-            tokenizer;
-    try{
-        tokenized_ = true;
-        boost::char_separator<char> sep("=;");
-        tokenizer t(expr,sep);
-        for (tokenizer::iterator tok_iter = t.begin();
-             tok_iter != t.end(); ++tok_iter){
-            string temp = *tok_iter++;
-            removeSpaces(temp);
-            customTokens_.insert(make_pair(temp,*tok_iter));
-        }
-    }catch(...){
-        tokenized_=false;
-    }
+    typedef tokenizer<char_separator<char> > tokenizer;
+    
+    if(expr.empty()) throw myException("empty input");
+    tokenized_ = true;
+    char_separator<char> sep("=;");
+    tokenizer t(expr,sep);
 
-    return tokenized_;
+    for (tokenizer::iterator it = t.begin(),end = t.end();it !=end ; ++it){
+        string temp = *it++;
+        if(it == end) throw myException("error in input syntax");
+        removeSpaces(temp);
+        customTokenStrings_.insert(make_pair(temp,*it));
+    }
+}
+
+bool Parser::checkSize(size_t count)
+{
+    bool correct = false;
+    if(result_.size()<count*9/10)       BaseToken::increaseRanges();
+    else if(result_.size()>count*11/10) BaseToken::decreaseRanges();
+    else correct = true;
+    return correct;
 }
 bool Parser::generate(size_t count,int attemptCout)
 {
-
-    auto mainToken = customTokenTrees_.at("main");
+    
+    auto tree = customTokenTrees_.at(mainTokenName_);
     do{
-        if(mainToken->generate()){
-            result_= mainToken->getResults();
-            if(result_.size()<count*9/10) increaseRanges();
-            else if(result_.size()>count*11/10) decreaseRanges();
-            else return true;
-
+        if(tree->generate()){
+            result_= tree->getResults();
+            if(checkSize(count))return true;
         }else return false;
     }while(--attemptCout);
-    return true;
+    return false;
 }
-void Parser::increaseRanges(){
-    ++BaseToken::ConcatenationDepth;
-    ++BaseToken::FigureBraceRepeatCount;
-    ++BaseToken::RecursionDepth;
-}
-void Parser::decreaseRanges(){
-    if(BaseToken::ConcatenationDepth>1)--BaseToken::ConcatenationDepth;
-    if(BaseToken::FigureBraceRepeatCount)--BaseToken::FigureBraceRepeatCount;
-    if(BaseToken::RecursionDepth>1)--BaseToken::RecursionDepth;
-}
+

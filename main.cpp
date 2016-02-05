@@ -1,6 +1,4 @@
 #include <iostream>
-#include "maintoken.h"
-
 #include <fstream>
 #include "parser.h"
 using namespace std;
@@ -15,21 +13,21 @@ void myAssert(bool condition,const string &message){
 
 
 void simpleTest(){
-    MainToken mt;
+    Tree mt;
     string expr = "  \"hellow generator\"  ";
     mt.buildTree(expr);
     mt.generate();
     myAssert(mt.getResults().front() == "hellow generator","Simple TestFailed");
 }
 void concatTest(){
-    MainToken mt;
+    Tree mt;
     string expr = " \"hellow \", \"generator\" ";
     mt.buildTree(expr);
     mt.generate();
     myAssert(mt.getResults().front() == "hellow generator","Concat test failed");
 }
 void orTest(){
-    MainToken mt;
+    Tree mt;
     string expr = " \"1\"| \"2\"|\"3\" ";
     mt.buildTree(expr);
     mt.generate();
@@ -40,7 +38,7 @@ void orTest(){
     myAssert(mt.getResults() == test,"or test failed");
 }
 void braceTest(){
-    MainToken mt;
+    Tree mt;
     string expr = "\"1\",(\"2\"|\"3\"),\"4\"";
     mt.buildTree(expr);
     mt.generate();
@@ -50,7 +48,7 @@ void braceTest(){
     myAssert(mt.getResults() == test,"brace test failed");
 }
 void SquareBraceTest(){
-    MainToken mt;
+    Tree mt;
     string expr = " [\"1\"] , [\"2\"], [\"3\"]";
     mt.buildTree(expr);
     mt.generate();
@@ -76,7 +74,7 @@ void SquareBraceTest(){
       myAssert(mt.getResults() == test,"square brace test failed(part2)");
 }
 void figurebraceTest(){
-    MainToken mt;
+    Tree mt;
     string expr = "{\"1\"}";
     mt.buildTree(expr);
     mt.generate();
@@ -122,24 +120,18 @@ int main()
 {
    setlocale(LC_ALL,"ru-RU.UTF-8");
 
-   RunAllTests();
-   MainToken mt;
+  // RunAllTests();
    ifstream wfs("input");
-
-   string expr, temp;// = "{(\"1\"|\"2\"|\"3\"|\"4\"|\"5\"|\"6\"|\"7\"|\"8\"|\"9\"|\"10\")}";
+   string expr, temp;
    while(wfs>>temp){
        expr.append(" ");
        expr.append(temp);
    }
    try{
        Parser &parser = Parser::getParser();
-       parser.customParse(expr);
+       parser.parse(expr);
        parser.generate(150);
        showResults(parser.getResults(),cout);
-   //std::cout<<"Building tree: "<<(mt.buildTree(expr)? "success":"fail")<<endl;
-   //std::cout<<"Generating out: "<<(mt.generate()? "success":"fail")<<endl;
-   //showResults(mt.getResults(),cout);
-   //mt.customParse(" main = [1] ; \n a = [1] ; \n b =[1] ; \n c =[1] ; \n d = [1];");
     }catch(exception &e){
        cerr<<"Error occured: "<<endl;
        cerr<<e.what()<<endl;
