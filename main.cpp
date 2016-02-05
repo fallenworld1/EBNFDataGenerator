@@ -1,7 +1,8 @@
 #include <iostream>
-#include "tokens.h"
-#include <time.h>
+#include "maintoken.h"
+
 #include <fstream>
+#include "parser.h"
 using namespace std;
 
 //inline QDebug operator<<(QDebug debug, const std::string &str){
@@ -111,25 +112,38 @@ void showResults(const ResultType &rt,ostream &os){
 /*what left
  * optimising or
  * custom tokens
- *
+ * как задавать параметры генерации,
+ * окуда считывать
  * пробелы в именах токенов отсутствуют
- * тоесть "token name = expr;" нельзя
+ *
  * русские буквы и спец символы только в качестве литералов.
  */
 int main()
 {
    setlocale(LC_ALL,"ru-RU.UTF-8");
-   srand(clock());
+
    RunAllTests();
    MainToken mt;
    ifstream wfs("input");
 
-   string expr;// = "{(\"1\"|\"2\"|\"3\"|\"4\"|\"5\"|\"6\"|\"7\"|\"8\"|\"9\"|\"10\")}";
-   wfs>>expr;
-   std::cout<<"Building tree: "<<(mt.buildTree(expr)? "success":"fai")<<endl;
-   std::cout<<"Generating out: "<<(mt.generate()? "success":"fai")<<endl;
-   showResults(mt.getResults(),cout);
-  // mt.globalParse(" main = [1] ; \n a = [1] ; \n b =[1] ; \n c =[1] ; \n d = [1];");
+   string expr, temp;// = "{(\"1\"|\"2\"|\"3\"|\"4\"|\"5\"|\"6\"|\"7\"|\"8\"|\"9\"|\"10\")}";
+   while(wfs>>temp){
+       expr.append(" ");
+       expr.append(temp);
+   }
+   try{
+       Parser parser;
+       parser.customParse(expr);
+       parser.generate();
+       showResults(parser.getResults(),cout);
+   //std::cout<<"Building tree: "<<(mt.buildTree(expr)? "success":"fail")<<endl;
+   //std::cout<<"Generating out: "<<(mt.generate()? "success":"fail")<<endl;
+   //showResults(mt.getResults(),cout);
+   //mt.customParse(" main = [1] ; \n a = [1] ; \n b =[1] ; \n c =[1] ; \n d = [1];");
+    }catch(exception &e){
+       cerr<<"Error occured: "<<endl;
+       cerr<<e.what()<<endl;
+   }
 
    return 0;
 

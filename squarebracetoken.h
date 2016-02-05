@@ -3,15 +3,15 @@
 #include "basetoken.h"
 
 class SquareBraceToken:public BaseToken{
-    BaseToken *child_;
-protected:
-     ~SquareBraceToken(){if(child_) delete child_;}
+    BasePtr child_;
 public:
+     ~SquareBraceToken(){}//if(child_) delete child_;}
+
     SquareBraceToken():child_(nullptr){}
-    void setChild(BaseToken *child){
+    void setChild(BasePtr child){
         child_ = child;
     }
-    void resetChild(BaseToken *other){
+    void resetChild(BasePtr other){
         other->setChild(child_);
         child_ = other;
     }

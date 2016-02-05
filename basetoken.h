@@ -4,8 +4,12 @@
 #include <stdexcept>
 #include <list>
 #include <algorithm>
+#include <memory>
+#include <iostream>
 
-enum{FigureBraceRepeatCount = 3, ConcatenationDepth = 5};
+
+
+enum{FigureBraceRepeatCount = 5, ConcatenationDepth = 10, RecursionDepth = 10};
 template<class IterType>
 bool advance_(IterType &it, IterType &end,size_t count){
    if(it==end)return false;
@@ -16,33 +20,32 @@ bool advance_(IterType &it, IterType &end,size_t count){
     }
     return true;
 }
-
-typedef std::list<std::string> ResultType;
-
 template<class Container, class Element>
 bool contain(const Container &c, const Element &e){
     using namespace std;
     return find(begin(c),end(c),e)!=end(c);
 }
-
+class MainToken;
+typedef std::list<std::string> ResultType;
+typedef std::shared_ptr<MainToken> MainPtr;
 
 using namespace std;
 
 
-
-
+class BaseToken;
+typedef std::shared_ptr<BaseToken> BasePtr;
 class BaseToken
 {
-   // static int Count_;
-protected:
+    //static int Count_;
+
 
 public:
     BaseToken(){
-       // qDebug()<<"created: "<<++Count_;
+    //    cout<<"created: "<<++Count_<<endl;
     }
 
-    virtual void setChild(BaseToken *child)=0;
-    virtual void resetChild(BaseToken *other)=0;
+    virtual void setChild(BasePtr child)=0;
+    virtual void resetChild(BasePtr other)=0;
     virtual void proc(ResultType &rt) = 0;
     void doProc(ResultType &rt){
       //  qDebug()<<"recDepth"<<++recDepth;
@@ -51,21 +54,20 @@ public:
     }
 
     virtual ~BaseToken(){
-        // qDebug()<<"Left: "<<--Count_;
+     //  cout<<"Left: "<<--Count_<<endl;
     }
 };
 
 class BraceToken:public BaseToken
 {
-    BaseToken *child_;
-protected:
-     ~BraceToken(){if(child_) delete child_;}
+    BasePtr child_;
 public:
+     ~BraceToken(){}//if(child_) delete child_;}
     BraceToken():child_(nullptr){}
-    void setChild(BaseToken *child){
+    void setChild(BasePtr child){
         child_ = child;
     }
-    void resetChild(BaseToken *other){
+    void resetChild(BasePtr other){
         other->setChild(child_);
         child_ = other;
     }

@@ -9,23 +9,23 @@ class CopyToken:public BaseToken{
     ResultType result;
 public:
     CopyToken(ResultType &rt):result(rt){}
-    void setChild(BaseToken*){}
-     void resetChild(BaseToken*){}
+    void setChild(BasePtr){}
+     void resetChild(BasePtr){}
      void proc(ResultType &rt){
          rt = result;
      }
 };
 
 class FigureBraceToken:public BaseToken{
-    BaseToken *child_;
-protected:
-     ~FigureBraceToken(){if(child_) delete child_;}
+    BasePtr child_;
+
+
 public:
     FigureBraceToken():child_(nullptr){}
-    void setChild(BaseToken *child){
+    void setChild(BasePtr child){
         child_ = child;
     }
-    void resetChild(BaseToken *other){
+    void resetChild(BasePtr other){
         other->setChild(child_);
         child_ = other;
     }
@@ -33,21 +33,21 @@ public:
         if(child_){
             child_->doProc(rt);
 
-            ConcatToken *top = new ConcatToken;
-            top->setChild(new CopyToken(rt));
+            std::shared_ptr<ConcatToken> top = std::make_shared<ConcatToken>();
+            top->setChild(std::make_shared<CopyToken>(rt));
 
             int i=1;
-            ConcatToken *current, *prev=top;
+            std::shared_ptr<ConcatToken>  current, prev=top;
             do{
-                prev->setChild(new CopyToken(rt));
+                prev->setChild(std::make_shared<CopyToken>(rt));
                 top->doProc(rt);
-                current = new ConcatToken;
+                current = std::make_shared<ConcatToken>();
                 prev->resetChild(current);
                 prev = current;
             }while(++i<FigureBraceRepeatCount-1);
-            prev->setChild(new CopyToken(rt));
+            prev->setChild(std::make_shared<CopyToken>(rt));
             top->doProc(rt);
-            delete static_cast<BaseToken*>(top);
+            //delete static_cast<BaseToken*>(top);
             //ResultType temp(rt);
             //rt.reserve(rt.size()*FigureBraceRepeatCount);
             /*for(int i=0,count = temp.count();i<FigureBraceRepeatCount-1;++i){
@@ -59,6 +59,7 @@ public:
         }
         else throw logic_error("Arg child_ not set in FigureBraceToken");
     }
+    ~FigureBraceToken(){}//if(child_) delete child_;}
 };
 #endif // FIGUREBRACETOKEN
 

@@ -5,21 +5,21 @@
 
 class ConcatToken : public BaseToken
 {
-    BaseToken *left_;
-    BaseToken *right_;
-protected:
+    BasePtr left_;
+    BasePtr right_;
+public:
     virtual ~ConcatToken(){
-        if(left_) delete left_;
-        if(right_) delete right_;
+        //if(left_) delete left_;
+        //if(right_) delete right_;
 
     }
-public:
+
     ConcatToken():left_(nullptr),right_(nullptr){}
-    void setChild(BaseToken *child){
+    void setChild(BasePtr child){
         if(left_==nullptr) left_=child;
         else right_ = child;
     }
-    void resetChild(BaseToken *other){
+    void resetChild(BasePtr other){
         other->setChild(this->right_);
         this->right_ = other;
     }

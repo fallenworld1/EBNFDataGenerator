@@ -3,58 +3,31 @@
 #include "ortoken.h"
 #include "texttoken.h"
 #include "concattoken.h"
-#include "tokens.h"
+#include "customtoken.h"
+#include "maintoken.h"
 
 #include <stack>
 #include <iostream>
 
+
 //int BaseToken::Count_ = 0;
+
 
 using namespace std;
 
-bool MainToken::globalParse(const string &expr)
+
+bool MainToken::buildTree(const string &expr)
 {
-    parsed_ = true;
-
-    //int customTokenNum = 1;
-    string customTokenName, customTokenDef;
-    auto it = begin(expr),end=std::end(expr);
-    do{
-        auto mem = it;
-        while(*it!=L'='&& it!=end)++it;
-        if(it == end) break;
-        customTokenName.append(mem,it);
-        customTokenName.erase(remove_if(begin(customTokenName),std::end(customTokenName), iswspace),std::end(customTokenName));
-        ++it;
-
-        mem = it;
-        while(*it!=L';'&& it!=end)++it;
-        if(it == end) break;
-        customTokenDef.append(mem,it);
-         ++it;
-
-        customTokens_.insert(make_pair(customTokenName,customTokenDef));
-        customTokenName.clear();
-        customTokenDef.clear();
-    }while(it!=end);
-    //replace(begin(expr),end(expr),L"main","$0");
-
-    return parsed_;
-}
-
-bool MainToken::buildTree(string &expr)
-{
-    if(!parsed_) return false;
+    if(expr.empty()) throw logic_error("empty token string");
     if(top_){
-        delete top_;
-        top_ = nullptr;
+        top_.reset();
         result_.clear();
     }
     treeValid_ = true;
-    typedef string::iterator it_type;
-    stack<BaseToken*> tokenStack;
-    it_type it = expr.begin(),end = expr.end();
-    BaseToken* current = new BraceToken;
+    //typedef string::iterator it_type;
+    stack<BasePtr> tokenStack;
+    auto it = expr.begin(),end = expr.end();
+    BasePtr current = std::make_shared<BraceToken>();
     top_ = current;
     try{
         while(it!=end){
@@ -62,38 +35,38 @@ bool MainToken::buildTree(string &expr)
             case '\"':{
                 string temp;
                 while(*(++it)!='\"') temp.push_back(*it);
-                TextToken *tt = new TextToken(temp);
+                BasePtr tt = std::make_shared<TextToken>(temp);
                 current->setChild(tt);
                 break;
             }
             case ',':{
-                ConcatToken *ct = new ConcatToken;
+                BasePtr ct = std::make_shared<ConcatToken>();
                 current->resetChild(ct);
                 current = ct;
                 break;
             }
             case '|':{
-                OrToken *ct = new OrToken;
+                BasePtr ct = std::make_shared<OrToken>();
                 current->resetChild(ct);
                 current = ct;
                 break;
             }
             case '(':{
-                BraceToken *bt = new BraceToken;
+                BasePtr bt = std::make_shared<BraceToken>();
                 tokenStack.push(current);
                 current->setChild(bt);
                 current = bt;
                 break;
             }
             case '[':{
-                SquareBraceToken *sbt = new SquareBraceToken;
+                BasePtr sbt = std::make_shared<SquareBraceToken>();
                 tokenStack.push(current);
                 current->setChild(sbt);
                 current = sbt;
                 break;
             }
             case '{':{
-                FigureBraceToken *fbt = new FigureBraceToken;
+                BasePtr fbt = std::make_shared<FigureBraceToken>();
                 tokenStack.push(current);
                 current->setChild(fbt);
                 current = fbt;
@@ -105,31 +78,47 @@ bool MainToken::buildTree(string &expr)
                 break;
             case ' ':case 0:break;
             default:
-                throw logic_error("wrong literal\n");
+                if(std::isalnum(*it)||*it=='_'){//probably custom token name
+                   auto begin = it;
+                   while(std::isalnum(*it)||*it=='_')++it;
+                   string name(begin,it);
+                   std::shared_ptr<CustomToken> ct = std::make_shared<CustomToken>(name,nullptr);
+                   current->setChild(ct);
+                   customTokens.push_back(ct);
+                   --it;
+                }
+                else throw logic_error("wrong literal");
             }
             ++it;
         }
     }
-    catch(logic_error &le){
-        cout<<le.what();
+    catch(exception &le){
+        //cout<<le.what()<<endl;
         treeValid_  =false;
+        throw le;
     }
-    catch(int i){
+    catch(int i){//?????
         cout<<i;
         treeValid_  =false;
     }
-
     return treeValid_;
 }
 
 bool MainToken::generate()
 {
     if(!treeValid_) return false;
-    if(top_) top_->doProc(result_);
-    else return false;
+    ++recurseDepth_;
 
+    if(recurseDepth_>RecursionDepth){
+        --recurseDepth_;
+            return true;
+    }
+
+    if(top_) top_->doProc(result_);
+    --recurseDepth_;
     if(result_.empty()) return false;
     return true;
 }
 
-MainToken::~MainToken(){if(top_)delete top_;}
+
+MainToken::~MainToken(){}//if(top_)delete top_;}
