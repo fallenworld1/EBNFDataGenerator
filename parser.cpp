@@ -20,11 +20,20 @@ bool Parser::link()
 Parser::Parser()
 {
     srand(clock());
+    BaseToken::ConcatenationDepth = 5;
+    BaseToken::FigureBraceRepeatCount = 5;
+    BaseToken::RecursionDepth = 5;
+}
+
+Parser &Parser::getParser()
+{
+    static Parser p;
+    return p;
 }
 
 Parser::~Parser()
 {
-   // delete customTokenTrees_["main"];
+    // delete customTokenTrees_["main"];
 }
 
 bool Parser::customParse(const string &expr)
@@ -64,11 +73,28 @@ bool Parser::tokenize(const string &expr)
 
     return tokenized_;
 }
-bool Parser::generate()
+bool Parser::generate(size_t count,int attemptCout)
 {
+
     auto mainToken = customTokenTrees_.at("main");
-    if(mainToken->generate()){
-        result_= mainToken->getResults();
-        return true;
-    }else return false;
+    do{
+        if(mainToken->generate()){
+            result_= mainToken->getResults();
+            if(result_.size()<count*9/10) increaseRanges();
+            else if(result_.size()>count*11/10) decreaseRanges();
+            else return true;
+
+        }else return false;
+    }while(--attemptCout);
+    return true;
+}
+void Parser::increaseRanges(){
+    ++BaseToken::ConcatenationDepth;
+    ++BaseToken::FigureBraceRepeatCount;
+    ++BaseToken::RecursionDepth;
+}
+void Parser::decreaseRanges(){
+    if(BaseToken::ConcatenationDepth>1)--BaseToken::ConcatenationDepth;
+    if(BaseToken::FigureBraceRepeatCount)--BaseToken::FigureBraceRepeatCount;
+    if(BaseToken::RecursionDepth>1)--BaseToken::RecursionDepth;
 }

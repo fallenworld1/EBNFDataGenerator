@@ -17,16 +17,20 @@ class Parser
     map<string,string> customTokens_;
     map<string,MainPtr> customTokenTrees_;
     bool link();
+     Parser();
+     void decreaseRanges();
+     void increaseRanges();
 public:
-    Parser();
+   static Parser& getParser();
     ~Parser();
-    bool  generate();
+    bool  generate(size_t count, int attemptCout = 500);
 
     bool  customParse(const std::string &expr);
 
     const ResultType&  getResults(){return result_;}
 
     bool tokenize(const string &expr);
+
 };
 
 #endif // PARSER_H

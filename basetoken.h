@@ -9,7 +9,7 @@
 
 
 
-enum{FigureBraceRepeatCount = 5, ConcatenationDepth = 10, RecursionDepth = 10};
+
 template<class IterType>
 bool advance_(IterType &it, IterType &end,size_t count){
    if(it==end)return false;
@@ -36,10 +36,12 @@ class BaseToken;
 typedef std::shared_ptr<BaseToken> BasePtr;
 class BaseToken
 {
-    //static int Count_;
+public: //static int Count_;
+static int FigureBraceRepeatCount;
+static int ConcatenationDepth;
+static int RecursionDepth;
 
 
-public:
     BaseToken(){
     //    cout<<"created: "<<++Count_<<endl;
     }

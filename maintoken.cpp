@@ -12,7 +12,9 @@
 
 //int BaseToken::Count_ = 0;
 
-
+int BaseToken::FigureBraceRepeatCount=5;
+int BaseToken::ConcatenationDepth=5;
+ int BaseToken::RecursionDepth=5;
 using namespace std;
 
 
@@ -108,8 +110,8 @@ bool MainToken::generate()
 {
     if(!treeValid_) return false;
     ++recurseDepth_;
-
-    if(recurseDepth_>RecursionDepth){
+    result_.clear();
+    if(recurseDepth_>BaseToken::RecursionDepth){
         --recurseDepth_;
             return true;
     }

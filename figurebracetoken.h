@@ -44,7 +44,7 @@ public:
                 current = std::make_shared<ConcatToken>();
                 prev->resetChild(current);
                 prev = current;
-            }while(++i<FigureBraceRepeatCount-1);
+            }while(++i<FigureBraceRepeatCount);
             prev->setChild(std::make_shared<CopyToken>(rt));
             top->doProc(rt);
             //delete static_cast<BaseToken*>(top);

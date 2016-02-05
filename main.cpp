@@ -132,9 +132,9 @@ int main()
        expr.append(temp);
    }
    try{
-       Parser parser;
+       Parser &parser = Parser::getParser();
        parser.customParse(expr);
-       parser.generate();
+       parser.generate(150);
        showResults(parser.getResults(),cout);
    //std::cout<<"Building tree: "<<(mt.buildTree(expr)? "success":"fail")<<endl;
    //std::cout<<"Generating out: "<<(mt.generate()? "success":"fail")<<endl;
