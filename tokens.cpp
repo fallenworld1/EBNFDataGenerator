@@ -5,6 +5,7 @@ size_t BaseToken::MaxConcatenationDepth=BaseToken::DefaultMaxConcatenationDepth;
 size_t BaseToken::MaxRecursionDepth=BaseToken::DefaultMaxRecursionDepth;
 /*concates the rr and lr results each to each
  * size of results reduced according ConcatenationDepth
+ * steps and begin randomized
  */
 void ConcatToken::proc(ResultType &rt){
     using namespace std;
@@ -86,7 +87,9 @@ void FigureBraceToken::proc(ResultType &rt){
     }
     else throw myException("Arg child_ not set in FigureBraceToken");
 }
-//add results of generating custom brunch to rt
+//
+//generate results r from inked tree
+//copy them to rt
 void CustomToken::proc(ResultType &rt){
     ++recurseDepth_;
     if(recurseDepth_<=MaxRecursionDepth){
@@ -98,7 +101,7 @@ void CustomToken::proc(ResultType &rt){
                 copy(begin(r),end(r),back_inserter(rt));
             }
             else myException("Error generating: "+name_);
-        }else throw myException("Arg child_ not set in CustomToken: "+name_);
+        }else throw myException("token: "+name_+"not defined");
     }
     --recurseDepth_;
 }

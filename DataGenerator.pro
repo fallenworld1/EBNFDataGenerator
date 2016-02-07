@@ -6,7 +6,8 @@ CONFIG -= qt
 SOURCES += main.cpp \
     parser.cpp \
     tokens.cpp \
-    tree.cpp
+    tree.cpp \
+    routines.cpp
 
 include(deployment.pri)
 qtcAddDeployment()

@@ -4,10 +4,12 @@
 #include <string>
 #include <exception>
 
+typedef std::string::iterator strIt;
+typedef std::string::const_iterator constStrIt;
 template<class IterType>
 //same as std::advance, but check for end
 bool advance_(IterType &it, IterType &end,size_t count){
-   if(it==end)return false;
+    if(it==end)return false;
     while(count){
         ++it;
         --count;
@@ -28,22 +30,26 @@ void removeSpaces(String &str){
 
 class myException: public std::exception
 {
-   std::string what_;
+    std::string what_;
 
-  virtual const char* what() const throw()
-  {
-    return what_.c_str();
-  }
+    virtual const char* what() const throw()
+    {
+        return what_.c_str();
+    }
 public:
 
-   myException(const std::string &&word):what_(word){}
-   myException(const std::string &word):what_(word){}
-   myException(const char *word, const char lit):what_(word){
-       char str[4] = "< >";
-       str[1] = lit;
-       what_.append(str);
-   }
+    myException(const std::string &&word):what_(word){}
+    myException(const std::string &word):what_(word){}
+    myException(const char *word, const char lit):what_(word){
+        char str[4] = "< >";
+        str[1] = lit;
+        what_.append(str);
+    }
 };
+void readEcqSequence(constStrIt &begin, const constStrIt &end, std::string &out);
+
+void readLiteralName(constStrIt &begin, const constStrIt &end, std::string &out);
+
 
 #endif // ROUTINES
 

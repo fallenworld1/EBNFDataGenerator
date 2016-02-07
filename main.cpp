@@ -1,15 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include "parser.h"
-using namespace std;
-
-//inline QDebug operator<<(QDebug debug, const std::string &str){
-//        return debug<<str.data();
-//}
-
-void myAssert(bool condition,const string &message){
-   if(!condition)cerr<<message<<endl;
-}
 
 
 /*void simpleTest(){
@@ -98,6 +89,7 @@ void RunAllTests(){
 }*/
 
 void showResults(const ResultType &rt,ostream &os){
+    using namespace std;
     os<<"results("<<rt.size()<<")\n";
     for(auto &s:rt){
         const char *str = s.c_str();
@@ -107,12 +99,10 @@ void showResults(const ResultType &rt,ostream &os){
 
 
 }
-/*what left
- *
- * спец символы ",;,=,\...c xnn и nnn
- */
+
 int main()
 {
+   using namespace std;
    setlocale(LC_ALL,"ru-RU.UTF-8");
 
   // RunAllTests();
@@ -127,7 +117,7 @@ int main()
        Parser &parser = Parser::getParser();
        parser.setMainTokenName("grammar");
        parser.parse(expr);
-       parser.generate(150,20);
+       parser.generate(150);
        showResults(parser.getResults(),ofs);
     }catch(exception &e){
        cerr<<"Error occured: "<<endl;

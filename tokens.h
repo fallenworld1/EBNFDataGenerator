@@ -15,9 +15,9 @@ class BaseToken
 {
     //static int Count_;
 protected:
-    enum Setting{MinElemCountToMultiplying = 5,
-                DefaultFigureBraceRepeatCount = 10,
-                DefaultMaxConcatenationDepth = 6,
+    enum Setting{MinElemCountToMultiplying = 3,
+                DefaultFigureBraceRepeatCount = 5,
+                DefaultMaxConcatenationDepth = 3,
                 DefaultMaxRecursionDepth = 3};
     static size_t FigureBraceRepeatCount;
     static size_t MaxConcatenationDepth;
