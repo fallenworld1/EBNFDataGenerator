@@ -27,7 +27,12 @@ bool Tree::buildTree(const string &expr)
             switch(*it){
             case '\"':{
                 string temp;
-                while(*(++it)!='\"') temp.push_back(*it);
+                //todo add esq seq,\xNNN \NNN
+                while(*(++it)!='\"'){
+                    if(*it=='\\')temp.push_back(*++it);
+                    else temp.push_back(*it);
+                }
+
                 BasePtr tt = std::make_shared<TextToken>(temp);
                 current->setChild(tt);
                 break;
@@ -72,13 +77,13 @@ bool Tree::buildTree(const string &expr)
             case ' ':case 0:break;
             default:
                 if(std::isalnum(*it)||*it=='_'){//probably custom token name
-                   auto begin = it;
-                   while(std::isalnum(*it)||*it=='_')++it;
-                   string name(begin,it);
-                   std::shared_ptr<CustomToken> ct = std::make_shared<CustomToken>(name,nullptr);
-                   current->setChild(ct);
-                   customTokens_.push_back(ct);
-                   --it;
+                    auto begin = it;
+                    while(std::isalnum(*it)||*it=='_')++it;
+                    string name(begin,it);
+                    std::shared_ptr<CustomToken> ct = std::make_shared<CustomToken>(name,nullptr);
+                    current->setChild(ct);
+                    customTokens_.push_back(ct);
+                    --it;
                 }
                 else throw myException("wrong literal: ",*it);
             }
@@ -93,10 +98,10 @@ bool Tree::buildTree(const string &expr)
     return treeValid_;
 }
 
-bool Tree::generate()
+bool Tree::generate(bool reGenerate)
 {
     if(!treeValid_) return false;
-    result_.clear();
+    if(reGenerate) result_.clear();
     if(top_) top_->proc(result_);
     return true;
 }

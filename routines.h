@@ -44,5 +44,6 @@ public:
        what_.append(str);
    }
 };
+
 #endif // ROUTINES
 

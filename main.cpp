@@ -12,7 +12,7 @@ void myAssert(bool condition,const string &message){
 }
 
 
-void simpleTest(){
+/*void simpleTest(){
     Tree mt;
     string expr = "  \"hellow generator\"  ";
     mt.buildTree(expr);
@@ -95,26 +95,21 @@ void RunAllTests(){
     figurebraceTest();
     cout<<"All tests done!\n";
 
-}
+}*/
 
 void showResults(const ResultType &rt,ostream &os){
     os<<"results("<<rt.size()<<")\n";
     for(auto &s:rt){
         const char *str = s.c_str();
-        os<<"{"<<str<<"} ";
+        os<<str<<endl;
     }
     os<<"end"<<endl;
 
 
 }
 /*what left
- * optimising or
- * custom tokens
- * как задавать параметры генерации,
- * окуда считывать
- * пробелы в именах токенов отсутствуют
  *
- * русские буквы и спец символы только в качестве литералов.
+ * спец символы ",;,=,\...c xnn и nnn
  */
 int main()
 {
@@ -122,6 +117,7 @@ int main()
 
   // RunAllTests();
    ifstream wfs("input");
+   ofstream ofs("output");
    string expr, temp;
    while(wfs>>temp){
        expr.append(" ");
@@ -129,9 +125,10 @@ int main()
    }
    try{
        Parser &parser = Parser::getParser();
+       parser.setMainTokenName("grammar");
        parser.parse(expr);
-       parser.generate(150);
-       showResults(parser.getResults(),cout);
+       parser.generate(150,20);
+       showResults(parser.getResults(),ofs);
     }catch(exception &e){
        cerr<<"Error occured: "<<endl;
        cerr<<e.what()<<endl;

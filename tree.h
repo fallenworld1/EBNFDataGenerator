@@ -16,7 +16,7 @@ public:
     Tree():treeValid_(false),recurseDepth_(0){}
 
     bool buildTree(const std::string &name);
-    bool generate();
+    bool generate(bool reGenerate);
     ResultType&  getResults(){return result_;}
     CTContainer& getCustomTokensList(){return customTokens_;}
 };

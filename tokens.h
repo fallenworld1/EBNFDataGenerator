@@ -15,6 +15,10 @@ class BaseToken
 {
     //static int Count_;
 protected:
+    enum Setting{MinElemCountToMultiplying = 5,
+                DefaultFigureBraceRepeatCount = 10,
+                DefaultMaxConcatenationDepth = 6,
+                DefaultMaxRecursionDepth = 3};
     static size_t FigureBraceRepeatCount;
     static size_t MaxConcatenationDepth;
     static size_t MaxRecursionDepth;
@@ -41,13 +45,29 @@ class CustomToken : public BaseToken
     TreePtr tree_;
     string name_;
     size_t recurseDepth_;
+    size_t memFBC;
+    size_t memMCD;
+    size_t memMRD;
 public:
-    CustomToken(const string &name, TreePtr mt):tree_(mt),name_(name),recurseDepth_(0){}
+    CustomToken(const string &name, TreePtr mt):tree_(mt),name_(name),recurseDepth_(0){save();}
     const string& name(){return name_;}
     void setMain(TreePtr mt){tree_=mt;}
     void setChild(BasePtr){}
     void resetChild(BasePtr){}
     void proc(ResultType &rt);
+    void save(){
+        memFBC =  FigureBraceRepeatCount;
+        memMCD = MaxConcatenationDepth;
+        memMRD =  MaxRecursionDepth;
+    }
+
+    bool ifChanged(){
+        if(memFBC !=  FigureBraceRepeatCount ||
+           memMCD != MaxConcatenationDepth||
+           memMRD !=  MaxRecursionDepth)
+            return false;
+        else return true;
+    }
 };
 class OneArgToken:public BaseToken
 {

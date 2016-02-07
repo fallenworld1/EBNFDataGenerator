@@ -50,12 +50,17 @@ void Parser::tokenize(const string &expr)
     tokenized_ = true;
     char_separator<char> sep("=;");
     tokenizer t(expr,sep);
+    tokenizer::iterator it = t.begin(),end = t.end();
+    try{
+        for (;it !=end ; ++it){
+            string temp = *it++;
+            if(it == end) throw myException("error in input syntax");
+            removeSpaces(temp);
+            customTokenStrings_.insert(make_pair(temp,*it));
+        }
+    }catch(std::exception &e){
 
-    for (tokenizer::iterator it = t.begin(),end = t.end();it !=end ; ++it){
-        string temp = *it++;
-        if(it == end) throw myException("error in input syntax");
-        removeSpaces(temp);
-        customTokenStrings_.insert(make_pair(temp,*it));
+        throw myException(e.what()+*it);
     }
 }
 
@@ -69,14 +74,20 @@ bool Parser::checkSize(size_t count)
 }
 bool Parser::generate(size_t count,int attemptCout)
 {
-    
-    auto tree = customTokenTrees_.at(mainTokenName_);
+    TreePtr tree;
+    try{
+        tree = customTokenTrees_.at(mainTokenName_);
+    }
+    catch(exception &e){
+        throw myException("Not find token: <"+mainTokenName_+"> May be grammar have custom main token name?");
+    }
+
     do{
-        if(tree->generate()){
+        if(tree->generate(true)){
             result_= tree->getResults();
             if(checkSize(count))return true;
         }else return false;
-    }while(--attemptCout);
+    }while(--attemptCout>0);
     return false;
 }
 
