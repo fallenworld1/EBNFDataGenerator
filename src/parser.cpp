@@ -1,6 +1,6 @@
 #include "parser.h"
 #include "tree.h"
-#include <boost/tokenizer.hpp>
+//#include <boost/tokenizer.hpp>
 #include <time.h>
 
 void Parser::link()
@@ -45,7 +45,7 @@ void Parser::parse(const string &expr)
 //tokenize input string whith = and ; delimetrs
 //vulnerable to = and ; literals
 //NOT USED
-void Parser::tokenize(const string &expr)
+/*void Parser::tokenize(const string &expr)
 {
     using namespace boost;
     typedef tokenizer<char_separator<char> > tokenizer;
@@ -66,7 +66,7 @@ void Parser::tokenize(const string &expr)
 
         throw myException(e.what()+*it);
     }
-}
+}*/
 //check if count of generated result in [count*0.9;count*1.1] range
 // and adjust generating ranges
 bool Parser::checkSize(size_t count)

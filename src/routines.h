@@ -38,7 +38,6 @@ class myException: public std::exception
     }
 public:
 
-    myException(const std::string &&word):what_(word){}
     myException(const std::string &word):what_(word){}
     myException(const char *word, const char lit):what_(word){
         char str[4] = "< >";

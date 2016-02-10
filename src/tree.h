@@ -11,10 +11,9 @@ class Tree{
     CTContainer customTokens_;
     string name_;
     bool treeValid_;
-    size_t recurseDepth_;
 
 public:
-    Tree():treeValid_(false),recurseDepth_(0){}
+    Tree():treeValid_(false){}
 
     bool buildTree(const std::string &name, constStrIt &begin);
     bool generate(bool reGenerate);
