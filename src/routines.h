@@ -22,10 +22,10 @@ bool contain(const Container &c, const Element &e){
     using namespace std;
     return find(begin(c),end(c),e)!=end(c);
 }
-template<class String>
-void removeSpaces(String &str){
+
+void removeSpaces(std::string &str){
     using namespace std;
-    str.erase(remove_if(begin(str),end(str),[](typename String::value_type c){return std::isspace(c);}),end(str));
+    str.erase(remove_if(begin(str),end(str),[](char c){return std::isspace(c);}),end(str));
 }
 
 class myException: public std::exception
