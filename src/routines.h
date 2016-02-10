@@ -1,13 +1,17 @@
-#ifndef ROUTINES
-#define ROUTINES
+#ifndef ROUTINES_H
+#define ROUTINES_H
+
 #include <algorithm>
 #include <string>
 #include <exception>
 
-typedef std::string::iterator strIt;
-typedef std::string::const_iterator constStrIt;
-template<class IterType>
+
+
+namespace Routines{
+using strIt= std::string::iterator;
+using constStrIt= std::string::const_iterator;
 //same as std::advance, but check for end
+template<class IterType>
 bool advance_(IterType &it, IterType &end,size_t count){
     if(it==end)return false;
     while(count){
@@ -23,10 +27,7 @@ bool contain(const Container &c, const Element &e){
     return find(begin(c),end(c),e)!=end(c);
 }
 
-void removeSpaces(std::string &str){
-    using namespace std;
-    str.erase(remove_if(begin(str),end(str),[](char c){return std::isspace(c);}),end(str));
-}
+void removeSpaces(std::string &str);
 
 class myException: public std::exception
 {
@@ -49,6 +50,6 @@ void readEcqSequence(constStrIt &begin, const constStrIt &end, std::string &out)
 
 void readLiteralName(constStrIt &begin, const constStrIt &end, std::string &out);
 
-
-#endif // ROUTINES
+}
+#endif // ROUTINES_H
 

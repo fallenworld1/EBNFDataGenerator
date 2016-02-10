@@ -8,15 +8,17 @@ QT       += testlib
 
 QT       -= gui
 
-TARGET = routinestester
-CONFIG   += console c++11
+TARGET = RoutinesTester
+CONFIG   += console\
+            c++11
 CONFIG   -= app_bundle
 
 TEMPLATE = app
 
 
 SOURCES += \
+ ../../src/routines.cpp\
     routinestester.cpp
-DEFINES += SRCDIR=\\\"$$PWD/\\\"
-INCLUDEPATH += $$PWD/../../src
-INCLUDEPATH += $$PWD/..
+
+HEADERS += \
+    ../../src/routines.h

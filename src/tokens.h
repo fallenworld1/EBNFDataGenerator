@@ -4,6 +4,8 @@
 #include <memory>
 #include "routines.h"
 
+using namespace Routines;
+
 using namespace std;
 typedef list<string> ResultType;
 class BaseToken;

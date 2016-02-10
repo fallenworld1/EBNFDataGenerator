@@ -1,6 +1,7 @@
+#include "../../src/routines.h"
+
 #include <QString>
 #include <QtTest>
-#include "routines.h"
 
 
 class RoutinesTester : public QObject
@@ -9,11 +10,12 @@ class RoutinesTester : public QObject
 
 public:
     RoutinesTester();
-
+    using str=std::string;
 private Q_SLOTS:
     void advance_Test();
     void removeSpacesTest();
     void readEcqSequenceTest();
+    void readEcqSequenceTest_data();
 };
 
 RoutinesTester::RoutinesTester()
@@ -21,7 +23,7 @@ RoutinesTester::RoutinesTester()
 }
 
 void RoutinesTester::advance_Test()
-{
+{   using Routines::advance_;
     QString tested("12345");
     auto begin = tested.begin(),end = tested.end();
     QVERIFY2(advance_(begin,end,10)==false,"Advance out of range(10)");
@@ -35,12 +37,28 @@ void RoutinesTester::advance_Test()
 
 void RoutinesTester::removeSpacesTest()
 {
-    std::string tested("a a a a a a                 aaf f ");
-    removeSpaces(tested);
+
+    str tested("a a a a a a                 aaf f ");
+    Routines::removeSpaces(tested);
     QVERIFY2(tested=="aaaaaaaaff","removeSpaces");
 }
 
 void RoutinesTester::readEcqSequenceTest()
+{
+    using Routines::constStrIt;
+    using Routines::readEcqSequence;
+    str tested  ="x99";
+    str result="\x99", functionResult;
+    constStrIt begin=tested.begin(),end = tested.end();
+    readEcqSequence(begin,end,functionResult);
+    QVERIFY2(tested==functionResult,"Reading esq-sequence fails");
+    tested  ="111";
+    result="\111";
+    functionResult.clear();
+
+}
+
+void RoutinesTester::readEcqSequenceTest_data()
 {
 
 }
