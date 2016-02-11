@@ -17,8 +17,6 @@ TEMPLATE = app
 
 
 SOURCES += \
- ../../src/routines.cpp\
+ ../../../src/routines.cpp\
     routinestester.cpp
-
-HEADERS += \
-    ../../src/routines.h
+INCLUDEPATH+= ../../../src/

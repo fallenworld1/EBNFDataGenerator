@@ -2,7 +2,6 @@ TEMPLATE = app
 CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
-
 SOURCES += \
     tokens.cpp \
     parser.cpp \
@@ -12,10 +11,9 @@ SOURCES += \
 include(deployment.pri)
 qtcAddDeployment()
 
-
+QMAKE_LFLAGS += -Wl,-rpath='$$ORIGIN'
 HEADERS += \
     tree.h \
     parser.h \
     routines.h \
-    tokens.h
-
+    tokens.

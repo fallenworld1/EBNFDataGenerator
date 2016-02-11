@@ -69,7 +69,7 @@ void FigureBraceToken::proc(ResultType &rt){
     typedef std::shared_ptr<ConcatToken> ConcatPtr;
     if(child_){
         child_->proc(rt);
-        size_t repeatCount = min(min((size_t)rt.size(),(size_t)MinElemCountToMultiplying),FigureBraceRepeatCount);
+        size_t repeatCount = min(max((size_t)rt.size(),(size_t)MinElemCountToMultiplying),FigureBraceRepeatCount);
         ConcatPtr top = std::make_shared<ConcatToken>();
         top->setChild(std::make_shared<CopyToken>(rt));
 

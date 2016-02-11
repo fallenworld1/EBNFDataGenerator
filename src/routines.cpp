@@ -24,7 +24,7 @@ void readEcqSequence(constStrIt &begin, const constStrIt &end, std::string &out)
         symbol = strtoul(b, &(e), 16);
         begin+=3;
     }
-    else if(isdigit(*begin) && begin+3<end){
+    else if(isdigit(*begin) && begin+2<end){
         char *b =const_cast<char*>(begin.base()),*e = b+3;
         symbol = strtoul(b, &(e), 10);
         begin+=3;
