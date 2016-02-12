@@ -14,6 +14,7 @@ private Q_SLOTS:
     void creating();
     void orTokenTest();
     void figureBraceTokenTest();
+    void concatToken();
 };
 
 TokensTest::TokensTest()
@@ -51,10 +52,18 @@ void TokensTest::figureBraceTokenTest()
 {
     FigureBraceToken fbt;
     ResultType result,tested;
+    std::string message;
     QVERIFY_EXCEPTION_THROWN(fbt.proc(result),myException);
-
     tt1->proc(tested);
-    for(int i=1;i<BaseToken::MinElemCountToMultiplying;++i) result.push_back(result[0]+result[i-1]);
+    auto str = tested.front(), insert = str;
+    for(int i=1;i<BaseToken::DefaultFigureBraceStep;++i) insert+=str;
+    str+=str;
+    tested.push_back(str);
+    size_t count = BaseToken::DefaultFigureBraceRepeatCount/BaseToken::DefaultFigureBraceStep;
+    for(size_t i=0;i<count;++i){
+        str+=insert;
+        tested.push_back(str);
+    }
     fbt.setChild(tt1);
     fbt.proc(result);
     for(auto &str:result){
@@ -63,6 +72,27 @@ void TokensTest::figureBraceTokenTest()
         message.append(str);
         QVERIFY2(Routines::contain(tested,str),message.data());
     }
+}
+
+void TokensTest::concatToken()
+{
+    ConcatToken cct;
+    ResultType result,temp;
+    std::string message;
+    QVERIFY_EXCEPTION_THROWN(cct.proc(result),myException);
+    tt1->proc(temp);
+    tt2->proc(temp);
+    std::string tested;
+    for(const auto&s:temp) tested+=s;
+    cct.setChild(tt1);
+    QVERIFY_EXCEPTION_THROWN(cct.proc(result),myException);
+    cct.setChild(tt2);
+    cct.proc(result);
+    message+=tested;
+    message.append("==");
+    message+=result.front();
+    QVERIFY2(result.front()==tested,message.data());
+
 }
 
 QTEST_APPLESS_MAIN(TokensTest)

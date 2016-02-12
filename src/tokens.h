@@ -18,15 +18,19 @@ class BaseToken
 {
     //static int Count_;
 protected:
-    enum Setting{MinElemCountToMultiplying = 3,
-                DefaultFigureBraceRepeatCount = 5,
-                DefaultMaxConcatenationDepth = 3,
-                DefaultMaxRecursionDepth = 3};
+
     static size_t FigureBraceRepeatCount;
     static size_t MaxConcatenationDepth;
     static size_t MaxRecursionDepth;
+    static size_t FigureBraceStep;
 
 public:
+    enum Setting{MinElemCountToMultiplying = 3,
+                DefaultFigureBraceRepeatCount = 12,
+                DefaultFigureBraceStep = 3,
+                DefaultMaxConcatenationDepth = 5,
+                DefaultMaxRecursionDepth = 3};
+
     BaseToken(){
         //    cout<<"created: "<<++Count_<<endl;
     }
@@ -151,7 +155,7 @@ public:
     void proc(ResultType &rt){
         if(child_){
             child_->proc(rt);
-            if(!contain(rt,"")) rt.push_back("");
+            rt.push_back("");
         }
         else throw myException("Arg child_ not set in SquareBraceToken");
     }
@@ -165,8 +169,8 @@ class OrToken : public TwoArgToken
 public:
     void proc(ResultType &rt){
         if(left_ && right_){
-            left_->proc(rt);
             right_->proc(rt);
+            if(rand()%200<100) left_->proc(rt);
         }
         else throw myException("args not set in OrToken");
     }

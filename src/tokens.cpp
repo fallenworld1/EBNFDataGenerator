@@ -3,6 +3,7 @@
 size_t BaseToken::FigureBraceRepeatCount=BaseToken::DefaultFigureBraceRepeatCount;
 size_t BaseToken::MaxConcatenationDepth=BaseToken::DefaultMaxConcatenationDepth;
 size_t BaseToken::MaxRecursionDepth=BaseToken::DefaultMaxRecursionDepth;
+size_t BaseToken::FigureBraceStep = BaseToken::DefaultFigureBraceStep;
 /*concates the rr and lr results each to each
  * size of results reduced according ConcatenationDepth
  * steps and begin randomized
@@ -31,20 +32,20 @@ void ConcatToken::proc(ResultType &rt){
 
         auto lrIt = begin(lr),lrEnd = end(lr), rrEnd = end(rr);
 
-        advance_(lrIt,lrEnd,rand()%lrStep/2);//add 0-lrStep-1 to the begiining pos, to randomize results
+        advance_(lrIt,lrEnd,rand()%lrStep/2);//add 0-lrStep-1 to the begining pos, to randomize results
         do{
             auto rrIt = begin(rr);
             advance_(rrIt,rrEnd,rand()%rrStep/2);
             do{
                 string temp(*lrIt+*rrIt);
-              //if(!contain(rt,temp))//take very long time
-                    rt.push_back(std::move(temp));
-            }while(advance_(rrIt,rrEnd,rand()%rrStep+1));
+                //if(!contain(rt,temp))//take very long time
+                rt.push_back(std::move(temp));
+            }while(advance_(rrIt,rrEnd,rand()%rrStep*2+1));
 
-        }while(advance_(lrIt,lrEnd,rand()%lrStep+1));
+        }while(advance_(lrIt,lrEnd,rand()%lrStep*2+1));
 
 
-       /* size_t iterationCount = MaxConcatenationDepth;
+        /* size_t iterationCount = MaxConcatenationDepth;
         //iterationCount = min(iterationCount,MaxConcatenationDepth);
 
         auto lrBegin= begin(lr),lrEnd = end(lr),rrBegin = begin(rr), rrEnd = end(rr);
@@ -68,27 +69,36 @@ void ConcatToken::proc(ResultType &rt){
 void FigureBraceToken::proc(ResultType &rt){
     typedef std::shared_ptr<ConcatToken> ConcatPtr;
     if(child_){
+        ResultType temp;
         child_->proc(rt);
-        size_t repeatCount = min(max((size_t)rt.size(),(size_t)MinElemCountToMultiplying),FigureBraceRepeatCount);
+        size_t repeatCount = FigureBraceRepeatCount;
         ConcatPtr top = std::make_shared<ConcatToken>();
-        top->setChild(std::make_shared<CopyToken>(rt));
+        std::shared_ptr<CopyToken> ct = std::make_shared<CopyToken>(rt);
+        top->setChild(ct);
 
 
         ConcatPtr  current, prev=top;
         do{
-            prev->setChild(std::make_shared<CopyToken>(rt));
-            top->proc(rt);
+            prev->setChild(ct);
+            if(repeatCount%FigureBraceStep==0){
+                temp.clear();
+                child_->proc(temp);
+                ct = std::make_shared<CopyToken>(temp);
+                top->proc(rt);
+            }
+
             current = std::make_shared<ConcatToken>();
             prev->resetChild(current);
             prev = current;
         }while(--repeatCount);
-        prev->setChild(std::make_shared<CopyToken>(rt));
+        prev->setChild(child_);
         top->proc(rt);
     }
     else throw myException("Arg child_ not set in FigureBraceToken");
 }
-//
-//generate results r from inked tree
+
+
+//generate results rt from linked tree
 //copy them to rt
 void CustomToken::proc(ResultType &rt){
     ++recurseDepth_;

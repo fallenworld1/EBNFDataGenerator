@@ -10,10 +10,9 @@ SOURCES += \
     main.cpp
 include(deployment.pri)
 qtcAddDeployment()
-
-QMAKE_LFLAGS += -Wl,-rpath='$$ORIGIN'
 HEADERS += \
     tree.h \
     parser.h \
     routines.h \
-    tokens.
+    tokens. \
+    tokens.h

@@ -16,8 +16,9 @@ TEMPLATE = app
 
 
 SOURCES += tokenstest.cpp \
-    ../../../src/tokens.cpp \
-    ../../../src/tree.cpp \
-    ../../../src/routines.cpp
-INCLUDEPATH+= ../../../src
+    ../../src/tree.cpp \
+    ../../src/routines.cpp \
+    ../../src/tokens.cpp
+
+INCLUDEPATH += ../../src/
 
