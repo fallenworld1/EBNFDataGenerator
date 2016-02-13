@@ -5,9 +5,10 @@
 #include "routines.h"
 
 
-using namespace Routines;
 
+using namespace routines;
 using namespace std;
+
 typedef list<string> ResultType;
 class BaseToken;
 typedef shared_ptr<BaseToken> BasePtr;
@@ -21,17 +22,20 @@ protected:
 
     static size_t FigureBraceRepeatCount;
     static size_t MaxConcatenationDepth;
+    static size_t FigureBraceDepth;
     static size_t MaxRecursionDepth;
     static size_t FigureBraceStep;
 
 public:
-    enum Setting{MinElemCountToMultiplying = 3,
-                DefaultFigureBraceRepeatCount = 12,
-                DefaultFigureBraceStep = 3,
-                DefaultMaxConcatenationDepth = 5,
-                DefaultMaxRecursionDepth = 3};
+    enum Setting{ DefaultFigureBraceRepeatCount = 6,
+                  DefaultFigureBraceStep        = 2,
+                  DefaultFigureBraceDepth       = 5,
+                  DefaultMaxConcatenationDepth  = 5,
+                  DefaultMaxRecursionDepth      = 3
+                };
 
-    BaseToken(){
+    BaseToken()
+    {
         //    cout<<"created: "<<++Count_<<endl;
     }
 
@@ -39,8 +43,9 @@ public:
     virtual void resetChild(BasePtr other)=0;
     //do specified operation
     virtual void proc(ResultType &rt) = 0;
-
-    virtual ~BaseToken(){
+    virtual size_t preCount()=0;
+    virtual ~BaseToken()
+    {
         //  cout<<"Left: "<<--Count_<<endl;
     }
     static void increaseRanges();
@@ -62,29 +67,34 @@ public:
     void setChild(BasePtr){}
     void resetChild(BasePtr){}
     void proc(ResultType &rt);
-    void save(){
+    void save()
+    {
         memFBC =  FigureBraceRepeatCount;
         memMCD = MaxConcatenationDepth;
         memMRD =  MaxRecursionDepth;
     }
 
-    bool ifChanged(){
+    bool ifChanged()
+    {
         if(memFBC !=  FigureBraceRepeatCount ||
            memMCD != MaxConcatenationDepth||
            memMRD !=  MaxRecursionDepth)
             return false;
         else return true;
     }
+    size_t preCount();
 };
 class OneArgToken:public BaseToken
 {
 protected:
     BasePtr child_;
 public:
-    void setChild(BasePtr child){
+    void setChild(BasePtr child)
+    {
         child_ = child;
     }
-    void resetChild(BasePtr other){
+    void resetChild(BasePtr other)
+    {
         other->setChild(child_);
         child_ = other;
     }
@@ -95,11 +105,13 @@ protected:
     BasePtr left_;
     BasePtr right_;
 public:
-    void setChild(BasePtr child){
+    void setChild(BasePtr child)
+    {
         if(left_==nullptr) left_=child;
         else right_ = child;
     }
-    void resetChild(BasePtr other){
+    void resetChild(BasePtr other)
+    {
         other->setChild(this->right_);
         this->right_ = other;
     }
@@ -110,15 +122,28 @@ class BraceToken:public OneArgToken
 public:
     //token that need to set pryority of operation
     //simple call child proc
-    void proc(ResultType &rt){
+    void proc(ResultType &rt)
+    {
         if(child_) child_->proc(rt);
         else throw myException("Arg child_ not set in BraceToken");
+    }
+    size_t preCount()
+    {
+        if(child_)return child_->preCount();
+        else return 0;
     }
 };
 class ConcatToken : public TwoArgToken
 {
 public:
     void proc(ResultType &rt);
+    size_t preCount()
+    {
+       size_t rp =right_->preCount(), lp=left_->preCount();
+       if(rp>MaxConcatenationDepth) rp = MaxConcatenationDepth;
+       if(lp>MaxConcatenationDepth) lp = MaxConcatenationDepth;
+        return lp*rp;
+    }
 };
 
 class CopyToken:public BaseToken
@@ -129,7 +154,9 @@ public:
     void setChild(BasePtr){}
     void resetChild(BasePtr){}
     //copy saved reasul. Its routine for figure braces
-    void proc(ResultType &rt){
+    size_t preCount(){return result.size();}
+    void proc(ResultType &rt)
+    {
         rt = result;
     }
 };
@@ -143,37 +170,49 @@ public:
     virtual void setChild(BasePtr){}
     virtual void resetChild(BasePtr){}
     //its a literal, just add text_ to result
-    void proc(ResultType &rt){
+    void proc(ResultType &rt)
+    {
         if(!text_.empty() && !contain(rt,text_)) rt.push_back(text_);
     }
+    size_t preCount(){return 1;}
 };
 
 class SquareBraceToken:public OneArgToken{
 
 public:
     //adds 1 or nothing
-    void proc(ResultType &rt){
-        if(child_){
+    void proc(ResultType &rt)
+    {
+        if(child_)
+        {
             child_->proc(rt);
             rt.push_back("");
         }
         else throw myException("Arg child_ not set in SquareBraceToken");
     }
+    size_t preCount(){return child_->preCount()+1;}
 };
 class FigureBraceToken:public OneArgToken{
 public:
     void proc(ResultType &rt);
+size_t preCount()
+{
+    auto s = child_->preCount();
+    return min(s,FigureBraceDepth)*FigureBraceRepeatCount+s;
+}
 };
 class OrToken : public TwoArgToken
 {
 public:
-    void proc(ResultType &rt){
+    void proc(ResultType &rt)
+    {
         if(left_ && right_){
             right_->proc(rt);
-            if(rand()%200<100) left_->proc(rt);
+            left_->proc(rt);
         }
         else throw myException("args not set in OrToken");
     }
+    size_t preCount(){return right_->preCount()+left_->preCount();}
 };
 
 #endif // BASETOKEN_H

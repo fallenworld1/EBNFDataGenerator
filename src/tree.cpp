@@ -10,7 +10,8 @@ using namespace std;
 bool Tree::buildTree(const string &expr, constStrIt &begin)
 {
     if(expr.empty()) throw myException("empty token string");
-    if(top_){
+    if(top_)
+    {
         top_.reset();
         result_.clear();
     }
@@ -19,10 +20,14 @@ bool Tree::buildTree(const string &expr, constStrIt &begin)
     auto end = std::end(expr);
     BasePtr current = std::make_shared<BraceToken>();
     top_ = current;
-    try{
-        while(begin!=end){
-            switch(*begin){
-            case '\"':{
+    try
+    {
+        while(begin!=end)
+        {
+            switch(*begin)
+            {
+            case '\"':
+            {
                 string temp;
                 ++begin;
                 readLiteralName(begin,end,temp);
@@ -30,33 +35,38 @@ bool Tree::buildTree(const string &expr, constStrIt &begin)
                 current->setChild(tt);
                 break;
             }
-            case ',':{
+            case ',':
+            {
                 BasePtr ct = std::make_shared<ConcatToken>();
                 current->resetChild(ct);
                 current = ct;
                 break;
             }
-            case '|':{
+            case '|':
+            {
                 BasePtr ct = std::make_shared<OrToken>();
                 current->resetChild(ct);
                 current = ct;
                 break;
             }
-            case '(':{
+            case '(':
+            {
                 BasePtr bt = std::make_shared<BraceToken>();
                 tokenStack.push(current);
                 current->setChild(bt);
                 current = bt;
                 break;
             }
-            case '[':{
+            case '[':
+            {
                 BasePtr sbt = std::make_shared<SquareBraceToken>();
                 tokenStack.push(current);
                 current->setChild(sbt);
                 current = sbt;
                 break;
             }
-            case '{':{
+            case '{':
+            {
                 BasePtr fbt = std::make_shared<FigureBraceToken>();
                 tokenStack.push(current);
                 current->setChild(fbt);
@@ -76,9 +86,11 @@ bool Tree::buildTree(const string &expr, constStrIt &begin)
                 break;
             case ' ':case 0:break;
             default:
-                if(std::isalnum(*begin)||*begin=='_'){//probably custom token name
+                if(std::isalnum(*begin)||*begin=='_')
+                {//probably custom token name
                     auto it = begin;
-                    while(std::isalnum(*it)||*it=='_'){
+                    while(std::isalnum(*it)||*it=='_')
+                    {
                         if(it == end) throw myException("unexpected end of string");
                         ++it;
                     }
@@ -93,7 +105,8 @@ bool Tree::buildTree(const string &expr, constStrIt &begin)
             ++begin;
         }
     }
-    catch(myException &le){
+    catch(myException &le)
+    {
         //cout<<le.what()<<endl;
         treeValid_  =false;
         throw le;
