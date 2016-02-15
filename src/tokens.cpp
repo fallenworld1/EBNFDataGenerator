@@ -8,10 +8,6 @@ size_t BaseToken::FigureBraceStep       =   BaseToken::DefaultFigureBraceStep;
 size_t BaseToken::FigureBraceDepth       =  BaseToken::DefaultFigureBraceDepth;
 
 
-/*concates the rr and lr results each to each
- * size of results reduced according ConcatenationDepth
- * steps and begin randomized
- */
 void ConcatToken::proc(ResultType &rt){
     using namespace std;
     if(left_ && right_)
@@ -56,9 +52,7 @@ void ConcatToken::proc(ResultType &rt){
 }
 
 
-/*multiply results rt FigureBraceRepeatCount times
- *
- */
+
 void FigureBraceToken::proc(ResultType &rt)
 {
     ResultType temp;
@@ -85,6 +79,53 @@ void FigureBraceToken::proc(ResultType &rt)
     while(++repeatCount<FigureBraceRepeatCount);//6
 
 }
+
+
+void CustomToken::proc(ResultType &rt)
+{
+    ++recurseDepth_;
+    if(recurseDepth_<=MaxRecursionDepth)
+    {
+        if(tree_)
+        {
+
+            if(tree_->generate(/*ifChanged()*/true))
+            {
+                //save();
+                ResultType &r = tree_->getResults();
+                copy(begin(r),end(r),back_inserter(rt));
+            }
+            else myException("Error generating: "+name_);
+        }
+        else throw myException("token: "+name_+"not defined");
+    }
+    --recurseDepth_;
+}
+
+size_t CustomToken::preCount()
+{
+    if(tree_)return tree_->preCount();
+    else return 0;
+}
+
+
+void BaseToken::increaseRanges()
+{
+    ++MaxConcatenationDepth;
+    ++FigureBraceDepth;
+    ++FigureBraceRepeatCount;
+    ++MaxRecursionDepth;
+}
+
+
+void BaseToken::decreaseRanges()
+{
+    if(MaxConcatenationDepth>DefaultMaxConcatenationDepth)--MaxConcatenationDepth;
+    if(FigureBraceRepeatCount>DefaultFigureBraceRepeatCount)--FigureBraceRepeatCount;
+    if(MaxRecursionDepth>DefaultMaxRecursionDepth)--MaxRecursionDepth;
+    if(FigureBraceDepth>DefaultFigureBraceDepth)--FigureBraceDepth;
+}
+
 
 /*void FigureBraceToken::proc(ResultType &rt)
 {
@@ -120,46 +161,3 @@ void FigureBraceToken::proc(ResultType &rt)
     else throw myException("Arg child_ not set in FigureBraceToken");
 }*/
 
-
-//generate results rt from linked tree
-//copy them to rt
-void CustomToken::proc(ResultType &rt)
-{
-    ++recurseDepth_;
-    if(recurseDepth_<=MaxRecursionDepth)
-    {
-        if(tree_)
-        {
-
-            if(tree_->generate(/*ifChanged()*/true))
-            {
-                //save();
-                ResultType &r = tree_->getResults();
-                copy(begin(r),end(r),back_inserter(rt));
-            }
-            else myException("Error generating: "+name_);
-        }
-        else throw myException("token: "+name_+"not defined");
-    }
-    --recurseDepth_;
-}
-
-size_t CustomToken::preCount()
-{
-    if(tree_)return tree_->preCount();
-    else return 0;
-}
-void BaseToken::increaseRanges()
-{
-    ++MaxConcatenationDepth;
-    ++FigureBraceDepth;
-    ++FigureBraceRepeatCount;
-    ++MaxRecursionDepth;
-}
-void BaseToken::decreaseRanges()
-{
-    if(MaxConcatenationDepth>DefaultMaxConcatenationDepth)--MaxConcatenationDepth;
-    if(FigureBraceRepeatCount>DefaultFigureBraceRepeatCount)--FigureBraceRepeatCount;
-    if(MaxRecursionDepth>DefaultMaxRecursionDepth)--MaxRecursionDepth;
-    if(FigureBraceDepth>DefaultFigureBraceDepth)--FigureBraceDepth;
-}

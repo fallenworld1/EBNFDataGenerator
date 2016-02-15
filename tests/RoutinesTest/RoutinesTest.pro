@@ -17,6 +17,6 @@ TEMPLATE = app
 
 
 SOURCES += \
- ../../../src/routines.cpp\
-    routinestester.cpp
-INCLUDEPATH+= ../../../src/
+    routinestester.cpp \
+    ../../src/routines.cpp
+INCLUDEPATH+= ../../src/

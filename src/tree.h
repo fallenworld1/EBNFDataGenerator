@@ -15,8 +15,25 @@ class Tree
 
 public:
     Tree():treeValid_(false){}
+    /**
+     * @brief preCount
+     * @return rough count of results that tree can produced
+     */
     size_t preCount(){ return top_->preCount();}
-    bool buildTree(const std::string &name, constStrIt &begin);
+    /**
+     * @brief buildTree
+     * @param expr
+     * @param begin
+     * @return true if build succesfully
+     * builds tree from pos @a begin  of @a expr to end(@a expr) or ';'
+     */
+    bool buildTree(const std::string &expr, constStrIt &begin);
+    /**
+     * @brief generate
+     * @param reGenerate
+     * @return
+     * generates results if @a reGenerate true
+     */
     bool generate(bool reGenerate);
 
     ResultType&         getResults()         {  return result_;         }

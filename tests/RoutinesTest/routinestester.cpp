@@ -26,7 +26,7 @@ RoutinesTester::RoutinesTester()
 }
 
 void RoutinesTester::advance_Test()
-{   using Routines::advance_;
+{   using routines::advance_;
     QString tested("12345");
     auto begin = tested.begin(),end = tested.end();
     QVERIFY2(advance_(begin,end,10)==false,"Advance out of range(10)");
@@ -42,7 +42,7 @@ void RoutinesTester::removeSpacesTest()
 {
 
     str tested("a a a a a a                 aaf f ");
-    Routines::removeSpaces(tested);
+    routines::removeSpaces(tested);
     QVERIFY2(tested=="aaaaaaaaff","removeSpaces");
 }
 
@@ -50,8 +50,8 @@ void RoutinesTester::readEcqSequenceTest()
 {
     QFETCH(QString,input);
     QFETCH(char,symbol);
-    using Routines::constStrIt;
-    using Routines::readEcqSequence;
+    using routines::constStrIt;
+    using routines::readEcqSequence;
     str tested,result,message;
     tested = input.toStdString();
     constStrIt begin=tested.begin(),end = tested.end();
@@ -80,8 +80,8 @@ void RoutinesTester::readLiteralTest()
 {
     QFETCH(QString,input);
     QFETCH(QString,output);
-    using Routines::constStrIt;
-    using Routines::readLiteralName;
+    using routines::constStrIt;
+    using routines::readLiteralName;
     str tested,result,message;
     tested = input.toStdString();
     constStrIt begin=tested.begin(),end = tested.end();
@@ -105,7 +105,7 @@ void RoutinesTester::readLiteralTest_data()
 }
 
 void RoutinesTester::throwingTest()
-{   using namespace Routines;
+{   using namespace routines;
     str s;
     constStrIt begin=s.begin(),end=s.end();
     QVERIFY_EXCEPTION_THROWN(readLiteralName(begin,end,s),myException);
@@ -116,8 +116,6 @@ void RoutinesTester::throwingTest()
     QVERIFY_EXCEPTION_THROWN(readLiteralName(begin,end,s),myException);
     s.append("urvr7hty897j7t6");
     QVERIFY_EXCEPTION_THROWN(readLiteralName(begin,end,s),myException);
-
-
 }
 
 

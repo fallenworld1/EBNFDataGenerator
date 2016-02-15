@@ -43,6 +43,10 @@ public:
     virtual void resetChild(BasePtr other)=0;
     //do specified operation
     virtual void proc(ResultType &rt) = 0;
+    /**
+     * @brief preCount returns ~amount of results this token can produce
+     * @return
+     */
     virtual size_t preCount()=0;
     virtual ~BaseToken()
     {

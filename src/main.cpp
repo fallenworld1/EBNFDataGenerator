@@ -13,18 +13,16 @@ void showResults(const ResultType &rt,ostream &os)
         os<<str<<endl;
     }
     os<<"end"<<endl;
-
-
 }
 // todo {] {) and smth must not work
 //tests for tree
 // | had priority for ,
+//многопоточно делать конкатенацию и фигурные скобки
+
 int main()
 {
    using namespace std;
    setlocale(LC_ALL,"ru-RU.UTF-8");
-
-  // RunAllTests();
    ifstream wfs("input");
    ofstream ofs("output");
    string expr, temp;

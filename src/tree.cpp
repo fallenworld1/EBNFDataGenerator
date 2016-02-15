@@ -4,9 +4,7 @@
 #include <iostream>
 
 using namespace std;
-//parse string expr from begin to end(expr) or ;
-//read name from begin to = exclude spaces
-//checks for input errors
+
 bool Tree::buildTree(const string &expr, constStrIt &begin)
 {
     if(expr.empty()) throw myException("empty token string");
@@ -105,20 +103,23 @@ bool Tree::buildTree(const string &expr, constStrIt &begin)
             ++begin;
         }
     }
-    catch(myException &le)
+    catch(...)
     {
-        //cout<<le.what()<<endl;
         treeValid_  =false;
-        throw le;
+        throw;
     }
     return treeValid_;
 }
-//generate new results if reGenerate
+
 bool Tree::generate(bool reGenerate)
 {
     if(!treeValid_) return false;
-    if(reGenerate) result_.clear();
-    if(top_) top_->proc(result_);
+    if(reGenerate)
+    {
+        result_.clear();
+        if(top_) top_->proc(result_);
+        else return false;
+    }
     return true;
 }
 
