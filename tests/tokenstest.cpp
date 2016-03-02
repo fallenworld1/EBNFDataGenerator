@@ -1,22 +1,40 @@
-#include <QString>
-#include <QtTest>
 #include "tokens.h"
+#include <gtest/gtest.h>
 
-class TokensTest : public QObject
+
+TEST(TokensTest,checkTypeTest)
 {
-    Q_OBJECT
-    BasePtr tt1;
-    BasePtr tt2;
-public:
-    TokensTest();
+    BasePtr tested = std::make_shared<TextToken>("");
+    ASSERT_FALSE(tested->checkType('f'))<<"TextTokenCheck";
 
-private Q_SLOTS:
-    void creating();
-    void orTokenTest();
-    void figureBraceTokenTest();
-    void concatToken();
-};
+    tested = std::make_shared<CustomToken>("",nullptr);
+    ASSERT_FALSE(tested->checkType('f'))<<"TextTokenCheck";
 
+    tested = std::make_shared<ConcatToken>();
+    ASSERT_FALSE(tested->checkType('{'))<<"ConcatTokenCheck";
+    ASSERT_TRUE(tested->checkType(','))<<"ConcatTokenCheck";
+
+    tested = std::make_shared<FigureBraceToken>();
+    ASSERT_FALSE(tested->checkType('h'))<<"ConcatTokenCheck";
+    ASSERT_TRUE(tested->checkType('{'))<<"ConcatTokenCheck";
+    ASSERT_TRUE(tested->checkType('}'))<<"ConcatTokenCheck";
+
+    tested = std::make_shared<SquareBraceToken>();
+    ASSERT_FALSE(tested->checkType(')'))<<"ConcatTokenCheck";
+    ASSERT_TRUE(tested->checkType(']'))<<"ConcatTokenCheck";
+    ASSERT_TRUE(tested->checkType('['))<<"ConcatTokenCheck";
+
+    tested = std::make_shared<RoundBraceToken>();
+    ASSERT_FALSE(tested->checkType('r'))<<"ConcatTokenCheck";
+    ASSERT_TRUE(tested->checkType('('))<<"ConcatTokenCheck";
+    ASSERT_TRUE(tested->checkType(')'))<<"ConcatTokenCheck";
+
+    tested = std::make_shared<OrToken>();
+    ASSERT_FALSE(tested->checkType('{'))<<"ConcatTokenCheck";
+    ASSERT_TRUE(tested->checkType('|'))<<"ConcatTokenCheck";
+}
+
+/*
 TokensTest::TokensTest()
 {
     tt1 = std::make_shared<TextToken>("1");
@@ -94,7 +112,5 @@ void TokensTest::concatToken()
     QVERIFY2(result.front()==tested,message.data());
 
 }
+*/
 
-QTEST_APPLESS_MAIN(TokensTest)
-
-#include "tokenstest.moc"

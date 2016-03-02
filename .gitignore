@@ -1,6 +1,8 @@
 build
+*/doc/*
 *.user*
 *.autosave
+
 !*.cpp
 !*.h
 !*.pro

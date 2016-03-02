@@ -20,16 +20,12 @@ HEADERS += \
 
 
 
-unix|win32: LIBS += -L$$PWD/../../../../boost/lib/lib/ -lboost_chrono
-unix|win32: LIBS += -L$$PWD/../../../../boost/lib/lib/ -lboost_system
-unix|win32: LIBS += -L$$PWD/../../../../boost/lib/lib/ -lboost_thread
 
-INCLUDEPATH += $$PWD/../../../../boost/lib/include
-DEPENDPATH += $$PWD/../../../../boost/lib/include
 
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../../../boost/lib/lib/boost_chrono.lib
-else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../../../boost/lib/lib/libboost_chrono.a
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../../../boost/lib/lib/boost_system.lib
-else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../../../boost/lib/lib/libboost_system.a
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../../../boost/lib/lib/boost_thread.lib
-else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../../../boost/lib/lib/libboost_thread.a
+
+unix:!macx|win32: LIBS += $$(THRDPARTY)/lib/boost/libboost_chrono.a
+unix:!macx|win32: LIBS += $$(THRDPARTY)/lib/boost/libboost_system.a
+unix:!macx|win32: LIBS += $$(THRDPARTY)/lib/boost/libboost_thread.a
+INCLUDEPATH += $$(THRDPARTY)/include
+DEPENDPATH += $$(THRDPARTY)/include
+

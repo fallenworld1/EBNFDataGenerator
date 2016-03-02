@@ -5,7 +5,7 @@
 
 using namespace std;
 
-bool Tree::buildTree(const string &expr, constStrIt &begin)
+void Tree::buildTree(const string &expr, constStrIt &begin)
 {
     if(expr.empty()) throw myException("empty token string");
     if(top_)
@@ -16,8 +16,10 @@ bool Tree::buildTree(const string &expr, constStrIt &begin)
     treeValid_ = true;
     stack<BasePtr> tokenStack;
     auto end = std::end(expr);
-    BasePtr current = std::make_shared<BraceToken>();
+    BasePtr current = std::make_shared<RoundBraceToken>();
     top_ = current;
+
+
     try
     {
         while(begin!=end)
@@ -49,7 +51,7 @@ bool Tree::buildTree(const string &expr, constStrIt &begin)
             }
             case '(':
             {
-                BasePtr bt = std::make_shared<BraceToken>();
+                BasePtr bt = std::make_shared<RoundBraceToken>();
                 tokenStack.push(current);
                 current->setChild(bt);
                 current = bt;
@@ -76,18 +78,30 @@ bool Tree::buildTree(const string &expr, constStrIt &begin)
                 break;
             case ';':
                 ++begin;
-                return treeValid_;
+                return;
                 break;
             case ')':case']':case'}':
-                current = tokenStack.top();
-                tokenStack.pop();
+            {
+                BasePtr last = tokenStack.top();
+                if(last->checkChildType(*begin))
+                {
+                    current = last;
+                    tokenStack.pop();
+
+                }
+                else throw myException("wrong closing brace: ",*begin,begin-expr.begin());
+
+               // current = tokenStack.top();
+               // tokenStack.pop();
+
                 break;
+            }
             case ' ':case 0:break;
             default:
-                if(std::isalnum(*begin)||*begin=='_')
+                if(isalnum(*begin)||*begin=='_')
                 {//probably custom token name
                     auto it = begin;
-                    while(std::isalnum(*it)||*it=='_')
+                    while(isalnum(*it)||*it=='_')
                     {
                         if(it == end) throw myException("unexpected end of string");
                         ++it;
@@ -98,7 +112,7 @@ bool Tree::buildTree(const string &expr, constStrIt &begin)
                     customTokens_.push_back(ct);
                     begin=it-1;
                 }
-                else throw myException("wrong literal: ",*begin);
+                else throw myException("wrong literal: ",*begin,begin-expr.begin());
             }
             ++begin;
         }
@@ -108,7 +122,6 @@ bool Tree::buildTree(const string &expr, constStrIt &begin)
         treeValid_  =false;
         throw;
     }
-    return treeValid_;
 }
 
 bool Tree::generate(bool reGenerate)

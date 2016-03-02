@@ -5,50 +5,54 @@ size_t BaseToken::FigureBraceRepeatCount=   BaseToken::DefaultFigureBraceRepeatC
 size_t BaseToken::MaxConcatenationDepth =   BaseToken::DefaultMaxConcatenationDepth;
 size_t BaseToken::MaxRecursionDepth     =   BaseToken::DefaultMaxRecursionDepth;
 size_t BaseToken::FigureBraceStep       =   BaseToken::DefaultFigureBraceStep;
-size_t BaseToken::FigureBraceDepth       =  BaseToken::DefaultFigureBraceDepth;
+size_t BaseToken::FigureBraceDepth      =   BaseToken::DefaultFigureBraceDepth;
 
 
-void ConcatToken::proc(ResultType &rt){
+void ConcatToken::proc(ResultType &rt)
+{
     using namespace std;
-    if(left_ && right_)
+
+    if(!left_ || !right_) throw myException("args not set ConcatToken");
+
+    ResultType rr,lr;
+    right_->proc(rr);
+    left_->proc(lr);
+
+    if(lr.empty())
     {
-        ResultType rr,lr;
-        right_->proc(rr);
-        left_->proc(lr);
-        if(lr.empty())
-        {
-            copy(begin(rr),end(rr),back_inserter(rt));
-            return;
-        }
-        if(rr.empty())
-        {
-            copy(begin(lr),end(lr),back_inserter(rt));
-            return;
-        }
-        size_t lrStep, rrStep;
+        copy(begin(rr),end(rr),back_inserter(rt));
+        return;
+    }
+    if(rr.empty())
+    {
+        copy(begin(lr),end(lr),back_inserter(rt));
+        return;
+    }
 
-        if(lr.size()>MaxConcatenationDepth) lrStep = lr.size()/MaxConcatenationDepth;
-        else                                lrStep=1;
+    size_t lrStep, rrStep;
 
-        if(rr.size()>MaxConcatenationDepth) rrStep = rr.size()/MaxConcatenationDepth;
-        else                                rrStep=1;
+    lrStep = lr.size()/(2*MaxConcatenationDepth);
+    if(lrStep==0) lrStep=1;
 
-        auto lrIt = begin(lr),lrEnd = end(lr), rrEnd = end(rr);
+    rrStep = rr.size()*2/MaxConcatenationDepth;
+    if(rrStep==0) rrStep=1;
 
-        advance_(lrIt,lrEnd,rand()%lrStep/2);//add 0-lrStep-1 to the begining pos, to randomize results
+
+    auto lrIt = begin(lr),lrEnd = end(lr),rrEnd = end(rr);
+    advance_(lrIt,lrEnd,rand()%lrStep);
+    do
+    {
+        auto rrIt = begin(rr);
+        advance_(rrIt,rrEnd,rand()%rrStep);
         do
         {
-           auto rrIt = std::begin(rr);
-           advance_(rrIt,rrEnd,rand()%rrStep/2);
-           do
-           {
-               rt.push_back(std::move(*lrIt+*rrIt));
-           }
-           while(advance_(rrIt,rrEnd,rand()%rrStep*2+1));
+            rt.push_back(move(*lrIt+*rrIt));
         }
-        while(advance_(lrIt,lrEnd,rand()%lrStep*2+1));
+        while(advance_(rrIt,rrEnd,rand()%rrStep*2+1));
     }
-    else throw myException("args not set ConcatToken");
+    while(advance_(lrIt,lrEnd,rand()%lrStep+1));
+
+
 }
 
 
@@ -57,6 +61,7 @@ void FigureBraceToken::proc(ResultType &rt)
 {
     ResultType temp;
     child_->proc(temp);
+    if(temp.empty()) return;
     child_->proc(rt);
     size_t  repeatCount = 0,
             defaultCountOfReproduced = min(temp.size(),FigureBraceDepth),
@@ -111,7 +116,7 @@ size_t CustomToken::preCount()
 
 void BaseToken::increaseRanges()
 {
-    ++MaxConcatenationDepth;
+    MaxConcatenationDepth+=2;
     ++FigureBraceDepth;
     ++FigureBraceRepeatCount;
     ++MaxRecursionDepth;
@@ -120,7 +125,7 @@ void BaseToken::increaseRanges()
 
 void BaseToken::decreaseRanges()
 {
-    if(MaxConcatenationDepth>DefaultMaxConcatenationDepth)--MaxConcatenationDepth;
+    if(MaxConcatenationDepth>DefaultMaxConcatenationDepth+2)MaxConcatenationDepth-=2;
     if(FigureBraceRepeatCount>DefaultFigureBraceRepeatCount)--FigureBraceRepeatCount;
     if(MaxRecursionDepth>DefaultMaxRecursionDepth)--MaxRecursionDepth;
     if(FigureBraceDepth>DefaultFigureBraceDepth)--FigureBraceDepth;

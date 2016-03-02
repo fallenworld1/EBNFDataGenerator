@@ -24,10 +24,10 @@ public:
      * @brief buildTree
      * @param expr
      * @param begin
-     * @return true if build succesfully
+     *
      * builds tree from pos @a begin  of @a expr to end(@a expr) or ';'
      */
-    bool buildTree(const std::string &expr, constStrIt &begin);
+    void buildTree(const std::string &expr, constStrIt &begin);
     /**
      * @brief generate
      * @param reGenerate

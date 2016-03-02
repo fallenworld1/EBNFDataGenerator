@@ -14,7 +14,7 @@ void Parser::link()
     }
 }
 
-Parser::Parser()
+Parser::Parser()		
 {
     srand(clock());
     setMainTokenName("main");
@@ -64,6 +64,12 @@ bool Parser::generate(size_t count,int attemptCout)
         throw myException("Not find token: <"+mainTokenName_+"> May be grammar have custom main token name?");
     }
 
+    if(attemptCout<0)
+    {
+        if(!tree->generate(true)) throw myException("Generating error");
+         result_= tree->getResults();
+        return true;
+    }
     do
     {
         if(checkSize(tree->preCount(),count))

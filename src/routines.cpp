@@ -21,14 +21,14 @@ void readEcqSequence(constStrIt &begin, const constStrIt &end, std::string &out)
     if(begin == end) throw myException("unexpected end of string");
     if(*begin=='x' && begin+2<end)
     {
-        char symbolString[3];
+        char symbolString[3] = {0};
         char* e = std::copy(begin+1,begin+3,symbolString);
         symbol = strtoul(symbolString, &e, 16);
         begin+=3;
     }
     else if(isdigit(*begin) && begin+2<end)
     {
-        char symbolString[4];
+        char symbolString[4] = {0};
         char * e = std::copy(begin,begin+3,symbolString);
         symbol = strtoul(symbolString, &e, 10);
         begin+=3;

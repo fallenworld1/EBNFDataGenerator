@@ -14,7 +14,7 @@ void showResults(const ResultType &rt,ostream &os)
     }
     os<<"end"<<endl;
 }
-// todo {] {) and smth must not work
+
 //tests for tree
 // | had priority for ,
 //многопоточно делать конкатенацию и фигурные скобки
@@ -26,7 +26,7 @@ int main()
    ifstream wfs("input");
    ofstream ofs("output");
    string expr, temp;
-   cout<<"Hellow from EBNF data generator, reading EBNF..."<<endl;
+   cout<<"Hello from EBNF data generator, reading EBNF..."<<endl;
    auto start = boost::chrono::steady_clock::now();
    while(wfs>>temp)
    {
@@ -47,7 +47,8 @@ int main()
 
        cout<<"Generating..."<<endl;
        start = boost::chrono::steady_clock::now();
-       parser.generate(150);
+       if(!parser.generate(150,500))
+           parser.generate(150);
        sec = boost::chrono::steady_clock::now() - start;
        cout<<"Time spent: "<<sec.count()<<std::endl;
 
@@ -62,6 +63,7 @@ int main()
        cerr<<"Error occured: "<<endl;
        cerr<<e.what()<<endl;
    }
+   //system("pause");
    return 0;
 
 
