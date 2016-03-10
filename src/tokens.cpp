@@ -8,85 +8,152 @@ size_t BaseToken::FigureBraceStep       =   BaseToken::DefaultFigureBraceStep;
 size_t BaseToken::FigureBraceDepth      =   BaseToken::DefaultFigureBraceDepth;
 
 
-void ConcatToken::proc(ResultType &rt)
+void ConcatToken::proc(StringList &rt)
 {
     using namespace std;
 
-    if(!left_ || !right_) throw myException("args not set ConcatToken");
+    if(!left_ || !right_) throw DGException("args not set ConcatToken");
 
-    ResultType rr,lr;
+    StringList rr,lr;
     right_->proc(rr);
     left_->proc(lr);
-
     if(lr.empty())
     {
-        copy(begin(rr),end(rr),back_inserter(rt));
+        rt.insert(end(rt),begin(rr),end(rr));
         return;
     }
     if(rr.empty())
     {
-        copy(begin(lr),end(lr),back_inserter(rt));
+        rt.insert(end(rt),begin(lr),end(lr));
         return;
     }
+    map<size_t,size_t> wordsLength;
+    size_t iterCount = max(rr.size(),lr.size());
+
+
+    auto lrIt = begin(lr),lrBegin = begin(lr),lrEnd = end(lr),rrIt = begin(rr),rrBegin = begin(rr),rrEnd = end(rr);
+    while(iterCount-->0)
+    {
+        auto &l = wordsLength[lrIt->size()+rrIt->size()];
+        ++l;
+        if(l<=5) rt.push_back(move(*lrIt+*rrIt));
+        if(++lrIt == lrEnd) lrIt = lrBegin;
+        if(++rrIt == rrEnd) rrIt = rrBegin;
+
+    }
+
+
+
+    /*
 
     size_t lrStep, rrStep;
 
-    lrStep = lr.size()/(2*MaxConcatenationDepth);
+    lrStep = lr.size()/(MaxConcatenationDepth);
     if(lrStep==0) lrStep=1;
 
-    rrStep = rr.size()*2/MaxConcatenationDepth;
+    rrStep = rr.size()/MaxConcatenationDepth;
     if(rrStep==0) rrStep=1;
 
-
     auto lrIt = begin(lr),lrEnd = end(lr),rrEnd = end(rr);
-    advance_(lrIt,lrEnd,rand()%lrStep);
-    do
+
+    if(lr.size()>rr.size())
     {
-        auto rrIt = begin(rr);
-        advance_(rrIt,rrEnd,rand()%rrStep);
+
+        advance_(lrIt,lrEnd,rand()%lrStep);
         do
         {
-            rt.push_back(move(*lrIt+*rrIt));
+            auto rrIt = begin(rr);
+            advance_(rrIt,rrEnd,rand()%rrStep);
+            do
+            {
+                rt.push_back(move(*lrIt+*rrIt));
+            }
+            while(advance_(rrIt,rrEnd,rand()%rrStep*2+1));
         }
-        while(advance_(rrIt,rrEnd,rand()%rrStep*2+1));
+        while(advance_(lrIt,lrEnd,rand()%lrStep*2+1));
+        auto rrIt = begin(rr);
+        while(rrIt!=rrEnd)
+        {
+             rt.emplace_back(move(*lrIt+*rrIt));
+             ++lrIt;
+             ++rrIt;
+            // if(rrIt==rrEnd)rrIt = begin(rr);
+        }
     }
-    while(advance_(lrIt,lrEnd,rand()%lrStep+1));
+    else
+    {
+       auto rrIt = begin(rr);
+       while(lrIt!=lrEnd)
+       {
+            rt.emplace_back(move(*lrIt+*rrIt));
+            ++lrIt;
+            ++rrIt;
+       }
+      /* if(find(lr.begin(),lr.end(),"") != lrEnd)
+       {
+           rt.insert(rt.end(),rrIt,rrEnd);
+       }
+       else
+       {
+           lrIt = begin(lr);
+           while(rrIt!=rrEnd)
+           {
+                rt.emplace_back(move(*lrIt+*rrIt));
+                ++lrIt;
+                ++rrIt;
+                if(lrIt==lrEnd)lrIt = begin(lr);
+           }
+       }
+    }*/
 
 
 }
 
 
 
-void FigureBraceToken::proc(ResultType &rt)
+void FigureBraceToken::proc(StringList &rt)
 {
-    ResultType temp;
+    using namespace std;
+	if (!child_) throw DGException("arg not set FigureBraceToken");
+    StringList temp;
+
     child_->proc(temp);
     if(temp.empty()) return;
-    child_->proc(rt);
-    size_t  repeatCount = 0,
-            defaultCountOfReproduced = min(temp.size(),FigureBraceDepth),
-            addingCount = FigureBraceStep,
-            countOfReproduced;
-    countOfReproduced = defaultCountOfReproduced;
-    string tempStr;
-    do
+    //child_->proc(rt);
+	size_t	addingCount = FigureBraceStep;				 ///count of stacked element              
+    
+    
+	string tempStr;							 ///stacked elements
+    rt.push_back("");						 ///{} represens 0(!) or more elements
+    rt.insert(end(rt),begin(temp),end(temp));///1element
+    while(addingCount<FigureBraceDepth)
+    {
+        for(auto &elem:temp)
+        {
+            tempStr.append(elem);
+            routines::ConcatNRandUnit(addingCount,temp,tempStr);//insert addingCount rand elements from temp in tempStr
+            rt.emplace_back(move(tempStr));
+        }
+        addingCount+=FigureBraceStep;
+    }
+    /*do
     {
         do
         {
-            addXTimes(addingCount,temp,tempStr);
-            rt.push_back(tempStr);
-            tempStr.clear();
+            ConcatNRandUnit(addingCount,temp,tempStr);//insert addingCount rand elements from temp in tempStr
+            rt.emplace_back(std::move(tempStr));
+            //tempStr.clear();
         }
         while(--countOfReproduced);
         addingCount+=FigureBraceStep;
         countOfReproduced = defaultCountOfReproduced;
     }
-    while(++repeatCount<FigureBraceRepeatCount);//6
+    while(++repeatCount<FigureBraceRepeatCount);//6*/
 
 }
 
 
-void CustomToken::proc(ResultType &rt)
+void CustomToken::proc(StringList &rt)
 {
     ++recurseDepth_;
     if(recurseDepth_<=MaxRecursionDepth)
@@ -97,20 +164,27 @@ void CustomToken::proc(ResultType &rt)
             if(tree_->generate(/*ifChanged()*/true))
             {
                 //save();
-                ResultType &r = tree_->getResults();
-                copy(begin(r),end(r),back_inserter(rt));
+                auto &r = tree_->getResults();
+                rt.insert(end(rt),begin(r),end(r));
             }
-            else myException("Error generating: "+name_);
+            else DGException("Error generating: "+name_);
         }
-        else throw myException("token: "+name_+"not defined");
+        else throw DGException("token: "+name_+"not defined");
     }
     --recurseDepth_;
 }
 
 size_t CustomToken::preCount()
 {
-    if(tree_)return tree_->preCount();
-    else return 0;
+    ++recurseDepth_;
+    size_t result = 0;
+    if(recurseDepth_<=MaxRecursionDepth)
+    {
+        if(tree_)result =  tree_->preCount();
+		else throw DGException("Tree not set in CustomToken "+ name_);
+    }
+    --recurseDepth_;
+    return result;
 }
 
 
@@ -119,7 +193,7 @@ void BaseToken::increaseRanges()
     MaxConcatenationDepth+=2;
     ++FigureBraceDepth;
     ++FigureBraceRepeatCount;
-    ++MaxRecursionDepth;
+    //++MaxRecursionDepth;
 }
 
 
@@ -127,42 +201,8 @@ void BaseToken::decreaseRanges()
 {
     if(MaxConcatenationDepth>DefaultMaxConcatenationDepth+2)MaxConcatenationDepth-=2;
     if(FigureBraceRepeatCount>DefaultFigureBraceRepeatCount)--FigureBraceRepeatCount;
-    if(MaxRecursionDepth>DefaultMaxRecursionDepth)--MaxRecursionDepth;
+    //if(MaxRecursionDepth>DefaultMaxRecursionDepth)--MaxRecursionDepth;
     if(FigureBraceDepth>DefaultFigureBraceDepth)--FigureBraceDepth;
 }
 
-
-/*void FigureBraceToken::proc(ResultType &rt)
-{
-    typedef std::shared_ptr<ConcatToken> ConcatPtr;
-    if(child_)
-    {
-
-        child_->proc(rt);
-        size_t repeatCount = 0,MultiplyCount;
-        ConcatPtr top = std::make_shared<ConcatToken>();
-        std::shared_ptr<CopyToken> ct = std::make_shared<CopyToken>(rt);
-        top->setChild(ct);
-
-
-        ConcatPtr  current, prev=top;
-        do
-        {
-            ResultType temp;
-            child_->proc(temp);
-            prev->setChild(std::make_shared<CopyToken>(temp));
-            if(repeatCount%FigureBraceStep==0)
-            {
-                top->proc(rt);
-            }
-            current = std::make_shared<ConcatToken>();
-            prev->resetChild(current);
-            prev = current;
-        }
-        while(--repeatCount);
-        prev->setChild(child_);
-        top->proc(rt);
-    }
-    else throw myException("Arg child_ not set in FigureBraceToken");
-}*/
 

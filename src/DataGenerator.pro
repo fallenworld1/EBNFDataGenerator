@@ -7,7 +7,9 @@ SOURCES += \
     parser.cpp \
     routines.cpp \
     tree.cpp \
-    main.cpp
+    main.cpp \
+    generator.cpp \
+    policy.cpp
 include(deployment.pri)
 
 qtcAddDeployment()
@@ -16,16 +18,19 @@ HEADERS += \
     parser.h \
     routines.h \
     tokens. \
-    tokens.h
+    tokens.h \
+    policy.h \
+    generator.h \
+    defines.h
 
 
 
 
 
 
-unix:!macx|win32: LIBS += $$(THRDPARTY)/lib/boost/libboost_chrono.a
-unix:!macx|win32: LIBS += $$(THRDPARTY)/lib/boost/libboost_system.a
-unix:!macx|win32: LIBS += $$(THRDPARTY)/lib/boost/libboost_thread.a
-INCLUDEPATH += $$(THRDPARTY)/include
-DEPENDPATH += $$(THRDPARTY)/include
+#unix:!macx|win32: LIBS += $$(THRDPARTY)/lib/boost/libboost_chrono.a
+#unix:!macx|win32: LIBS += $$(THRDPARTY)/lib/boost/libboost_system.a
+#unix:!macx|win32: LIBS += $$(THRDPARTY)/lib/boost/libboost_thread.a
+#INCLUDEPATH += $$(THRDPARTY)/include
+#DEPENDPATH += $$(THRDPARTY)/include
 

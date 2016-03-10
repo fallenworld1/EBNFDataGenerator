@@ -4,25 +4,30 @@
 #
 #-------------------------------------------------
 TEMPLATE = app
-CONFIG += console c++11
+CONFIG += console c++11 no_batch
 CONFIG -= app_bundle
+
 
 SOURCES += \
     ../src/routines.cpp \
-    main.cpp \
     routine_tests.cpp \
     tokenstest.cpp \
     ../src/tokens.cpp \
-    ../src/tree.cpp
+    ../src/tree.cpp \
+    tree_tests.cpp
 
 INCLUDEPATH+= ../src
 
-unix|win32: LIBS +=  $$(THRDPARTY)/gtest/lib/libgtest.a
+INCLUDEPATH += $$(THRDPARTY)/include
 
-INCLUDEPATH += $$(THRDPARTY)/gtest/include
-#message(INCLUDEPATH:    $$INCLUDEPATH)
-DEPENDPATH += $$(THRDPARTY)/gtest/include
-#message(DEPENDPATH:     $$DEPENDPATH)
+DEPENDPATH += $$(THRDPARTY)/include
 
-#win32:!win32-g++: PRE_TARGETDEPS +=  $$(THRDPARTY)/gtest/lib/gtest.lib
-#else:unix|win32-g++: PRE_TARGETDEPS +=  $$(THRDPARTY)/gtest/lib/libgtest.a
+unix:!macx|win32: LIBS += -L$$(THRDPARTY)/lib/ -lgtest_64
+unix:!macx|win32: LIBS += -L$$(THRDPARTY)/lib/ -lgtest_main_64
+#libraries must be compilled with MTd flag
+#to use Qt Creator Google Test plugin uncheck Projects->Run->Run in terminal
+
+#win32:!win32-g++: PRE_TARGETDEPS += $$(THRDPARTY)/lib/gtest.lib
+#else:unix:!macx|win32-g++: PRE_TARGETDEPS += $$(THRDPARTY)/lib/libgtest.a
+
+

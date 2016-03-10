@@ -34,83 +34,102 @@ TEST(TokensTest,checkTypeTest)
     ASSERT_TRUE(tested->checkType('|'))<<"ConcatTokenCheck";
 }
 
-/*
-TokensTest::TokensTest()
+class ServiceClass : public testing::Test
 {
-    tt1 = std::make_shared<TextToken>("1");
-    tt2 = std::make_shared<TextToken>("2");
-}
+protected:
+	void SetUp()override{}
+	void TearDown()override{}
+	BasePtr tt1;
+	BasePtr tt2;
+public:
+	ServiceClass()
+	{
+		tt1 = std::make_shared<TextToken>("1");
+		tt2 = std::make_shared<TextToken>("2");
+	}
+	
 
-void TokensTest::creating()
-{
-    QVERIFY2(true, "Failure");
-}
+	
+};
 
-void TokensTest::orTokenTest()
+TEST_F(ServiceClass,orTokenTest)
 {
     OrToken o;
-    ResultType result, tested;
+    StringList result, tested;
     std::string message;
     tt1->proc(tested);
     tt2->proc(tested);
-    QVERIFY_EXCEPTION_THROWN(o.proc(result),myException);
-    o.setChild(tt1);
-    o.setChild(tt2);
-    o.proc(result);
-    for(auto &str:result){
-        message.clear();
-        message.append("Unexpected result");
-        message.append(str);
-        QVERIFY2(Routines::contain(tested,str),message.data());
-    }
+    
+	ASSERT_THROW(o.proc(result),DGException) << "Childs not set";
+    o.setChild(tt2);//tt2 goes left
+	ASSERT_THROW(o.proc(result), DGException) << "Childs not set";
+    o.setChild(tt1);//tt1 goes right
 
+	o.proc(result);
+	ASSERT_EQ(tested[0], result[0]);
+	ASSERT_EQ(tested[1], result[1]);
 }
 
-void TokensTest::figureBraceTokenTest()
+
+TEST_F(ServiceClass,figureBraceTokenTest)
 {
     FigureBraceToken fbt;
-    ResultType result,tested;
+    StringList result,tested;
     std::string message;
-    QVERIFY_EXCEPTION_THROWN(fbt.proc(result),myException);
-    tt1->proc(tested);
-    auto str = tested.front(), insert = str;
-    for(int i=1;i<BaseToken::DefaultFigureBraceStep;++i) insert+=str;
-    str+=str;
-    tested.push_back(str);
-    size_t count = BaseToken::DefaultFigureBraceRepeatCount/BaseToken::DefaultFigureBraceStep;
-    for(size_t i=0;i<count;++i){
-        str+=insert;
-        tested.push_back(str);
-    }
-    fbt.setChild(tt1);
-    fbt.proc(result);
-    for(auto &str:result){
-        message.clear();
-        message.append("Unexpected result");
-        message.append(str);
-        QVERIFY2(Routines::contain(tested,str),message.data());
-    }
-}
+	ASSERT_THROW(fbt.proc(result), DGException) << "Childs not set";
+	tested.emplace_back("");
+	tt1->proc(tested);
+	
+	auto str = tested.back(), inserted = str;
+    int step = BaseToken::DefaultFigureBraceStep, depth = BaseToken::DefaultFigureBraceDepth;
+    for (int i = step; i < depth; i += step)
+	{
+		int j = step;
+		while (j-->0)
+		{
+			inserted += str;
+		}
+		tested.emplace_back(inserted);
+	}
+	fbt.setChild(tt1);
+	fbt.proc(result);
 
-void TokensTest::concatToken()
+	ASSERT_EQ(result.size(), tested.size());
+    for (int i = static_cast<int>(result.size()) - 1; i >= 0; --i)
+	{
+		ASSERT_EQ(result[i], tested[i]);
+	}
+}
+TEST_F(ServiceClass, concatToken)
 {
+	using namespace routines;
     ConcatToken cct;
-    ResultType result,temp;
-    std::string message;
-    QVERIFY_EXCEPTION_THROWN(cct.proc(result),myException);
+    StringList result,temp;
+	std::string message,tested;
+   
     tt1->proc(temp);
     tt2->proc(temp);
-    std::string tested;
-    for(const auto&s:temp) tested+=s;
-    cct.setChild(tt1);
-    QVERIFY_EXCEPTION_THROWN(cct.proc(result),myException);
+	temp[0] += temp[1];
+
+	ASSERT_THROW(cct.proc(result), DGException) << "Childs not set";
+	cct.setChild(tt1);
+	ASSERT_THROW(cct.proc(result), DGException) << "Childs not set";
     cct.setChild(tt2);
     cct.proc(result);
-    message+=tested;
-    message.append("==");
-    message+=result.front();
-    QVERIFY2(result.front()==tested,message.data());
+
+	ASSERT_EQ(result[0], temp[0]);
 
 }
-*/
+TEST_F(ServiceClass, SquareBraceTokenTest)
+{
+	SquareBraceToken sbt;
+	StringList result, temp;
+	ASSERT_THROW(sbt.proc(result), DGException) << "Childs not set";
+	tt1->proc(temp);
+	temp.emplace_back("");
+	sbt.setChild(tt1);
+	sbt.proc(result);
+	ASSERT_EQ(result[0], temp[0]);
+	ASSERT_EQ(result[1], temp[1]);
+}
 

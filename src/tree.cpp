@@ -5,20 +5,32 @@
 
 using namespace std;
 
+void Tree::adjustResults()
+{
+     addingPolicy_->refresh();
+    /* result_.remove_if(
+                 [this](const std::string &elem)->bool{return !addingPolicy_->check(elem);}
+     );*/
+     auto it = std::remove_if(
+                    begin(result_),
+                    end(result_),
+                    [this](const std::string &elem)->bool{return !addingPolicy_->check(elem);}
+     );
+     if(it!=end(result_)) result_.erase(it);
+                  //[this](const std::string &elem)->bool{return elem.size()>maxResultLength_;});
+     result_.insert(std::end(result_),begin(dictionary_),end(dictionary_));
+
+}
+
 void Tree::buildTree(const string &expr, constStrIt &begin)
 {
-    if(expr.empty()) throw myException("empty token string");
-    if(top_)
-    {
-        top_.reset();
-        result_.clear();
-    }
+    if(expr.empty()) throw DGException("empty token string");
+
     treeValid_ = true;
     stack<BasePtr> tokenStack;
     auto end = std::end(expr);
     BasePtr current = std::make_shared<RoundBraceToken>();
     top_ = current;
-
 
     try
     {
@@ -30,7 +42,7 @@ void Tree::buildTree(const string &expr, constStrIt &begin)
             {
                 string temp;
                 ++begin;
-                readLiteralName(begin,end,temp);
+                routines::readLiteralName(begin,end,temp);
                 BasePtr tt = std::make_shared<TextToken>(temp);
                 current->setChild(tt);
                 break;
@@ -40,6 +52,7 @@ void Tree::buildTree(const string &expr, constStrIt &begin)
                 BasePtr ct = std::make_shared<ConcatToken>();
                 current->resetChild(ct);
                 current = ct;
+                canChange_=true;
                 break;
             }
             case '|':
@@ -71,10 +84,12 @@ void Tree::buildTree(const string &expr, constStrIt &begin)
                 tokenStack.push(current);
                 current->setChild(fbt);
                 current = fbt;
+                canChange_=true;
                 break;
             }
             case '=':
                 name_ = customTokens_.back()->name();
+                canChange_=false;
                 break;
             case ';':
                 ++begin;
@@ -89,7 +104,7 @@ void Tree::buildTree(const string &expr, constStrIt &begin)
                     tokenStack.pop();
 
                 }
-                else throw myException("wrong closing brace: ",*begin,begin-expr.begin());
+                else throw DGException("wrong closing brace: ",*begin,begin-expr.begin());
 
                // current = tokenStack.top();
                // tokenStack.pop();
@@ -103,16 +118,17 @@ void Tree::buildTree(const string &expr, constStrIt &begin)
                     auto it = begin;
                     while(isalnum(*it)||*it=='_')
                     {
-                        if(it == end) throw myException("unexpected end of string");
+                        if(it == end) throw DGException("Unexpected end of string.");
                         ++it;
                     }
                     string name(begin,it);
-                    std::shared_ptr<CustomToken> ct = std::make_shared<CustomToken>(name,nullptr);
+                    auto ct = std::make_shared<CustomToken>(name,nullptr);
                     current->setChild(ct);
                     customTokens_.push_back(ct);
                     begin=it-1;
+                    canChange_=true;//TODO add smart changing flag, checks for changing ability of all custom tokens after full parsing
                 }
-                else throw myException("wrong literal: ",*begin,begin-expr.begin());
+                else throw DGException("Wrong literal: ",*begin,begin-expr.begin());
             }
             ++begin;
         }
@@ -127,12 +143,18 @@ void Tree::buildTree(const string &expr, constStrIt &begin)
 bool Tree::generate(bool reGenerate)
 {
     if(!treeValid_) return false;
-    if(reGenerate)
+    if(canChange_ || result_.empty())
     {
-        result_.clear();
-        if(top_) top_->proc(result_);
-        else return false;
+        if(reGenerate)
+        {
+            result_.clear();
+            if(top_) top_->proc(result_);
+            else return false;
+            if(!canChange_) adjustResults();
+        }
     }
     return true;
 }
+
+
 

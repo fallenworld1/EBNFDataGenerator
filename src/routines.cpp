@@ -1,16 +1,16 @@
 #include "routines.h"
-
-
+#include <cctype>
+#undef _DEB
 namespace routines{
 
 void readLiteralName(constStrIt &begin, const constStrIt &end, std::string &out)
 {
-    if(begin == end) throw myException("unexpected end of string");
+    if(begin == end) throw DGException("unexpected end of string");
     while(*(begin)!='\"')
     {
         if(*begin=='\\')readEcqSequence(++begin,end,out);
         else out.push_back(*begin++);
-        if(begin == end) throw myException("unexpected end of string");
+        if(begin == end) throw DGException("unexpected end of string");
     }
 }
 
@@ -18,24 +18,23 @@ void readLiteralName(constStrIt &begin, const constStrIt &end, std::string &out)
 void readEcqSequence(constStrIt &begin, const constStrIt &end, std::string &out)
 {
     unsigned char symbol;
-    if(begin == end) throw myException("unexpected end of string");
-    if(*begin=='x' && begin+2<end)
+    if(begin == end) throw DGException("unexpected end of string");
+    if(*begin=='x' && begin<end-2)
     {
         char symbolString[3] = {0};
         char* e = std::copy(begin+1,begin+3,symbolString);
-        symbol = strtoul(symbolString, &e, 16);
+        symbol = (unsigned char)strtoul(symbolString, &e, 16);//number must fit in char e.g. 0-FF
         begin+=3;
     }
-    else if(isdigit(*begin) && begin+2<end)
+    else if(isdigit(*begin) && begin<end-2)//writing
     {
         char symbolString[4] = {0};
         char * e = std::copy(begin,begin+3,symbolString);
-        symbol = strtoul(symbolString, &e, 10);
+        symbol = (unsigned char)strtoul(symbolString, &e, 10);//number must fit in char e.g. 0-255
         begin+=3;
     }
     else symbol = *begin++;
     out.push_back(symbol);
-    //
 }
 
 

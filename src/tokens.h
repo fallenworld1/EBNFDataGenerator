@@ -1,19 +1,13 @@
 #ifndef BASETOKEN_H
 #define BASETOKEN_H
-#include <list>
-#include <memory>
+
 #include "routines.h"
-//#include <iostream>
+#include "defines.h"
 
 
-using namespace routines;
-using namespace std;
 
-using ResultType = list<string> ;
-class BaseToken;
-using BasePtr = shared_ptr<BaseToken>;
-class Tree;
-using TreePtr = shared_ptr<Tree> ;
+
+using routines::DGException;
 
 class BaseToken
 {
@@ -27,6 +21,7 @@ protected:
     static size_t FigureBraceStep;
 
 public:
+
     enum DefaultRanges
     {
         DefaultFigureBraceRepeatCount = 6, // count of repeating {token}
@@ -35,30 +30,30 @@ public:
         DefaultMaxConcatenationDepth  = 5, // amount of multiplying steps
         DefaultMaxRecursionDepth      = 3  // to protect from left recursion
     };
-
+	
 
     BaseToken()
     {
-        //    cout<<"created: "<<++Count_<<endl;
+        //cout<<"created: "<<++Count_<<endl;
     }
-    /**
-     * @brief set one of token child(according token type) to @a child
-     * @param child
+    /*!
+     * \brief set one of token child(according token type) to \a child
+     * \param child
      */
     virtual void setChild(BasePtr child)=0;
-    /**
-     * @brief reset one of token child(according token type) to @a other and sets child of @a other
-     * @param other
+    /*!
+     * \brief reset one of token child(according token type) to \a other and sets child of \a other
+     * \param other
      */
     virtual void resetChild(BasePtr other)=0;
-    /**
-     * @brief process token specific operations and store results to @a rt
-     * @param rt
+    /*!
+     * \brief process token specific operations and store results to \a rt
+     * \param rt
      */
-    virtual void proc(ResultType &rt) = 0;
-    /**
-     * @brief preCount returns ~amount of results this token can produce
-     * @return
+    virtual void proc(StringList &rt) = 0;
+    /*!
+     * \brief preCount returns ~amount of results this token can produce
+     * \return
      */
     virtual size_t preCount()=0;
     /*!
@@ -83,46 +78,64 @@ public:
         //std::cout<<"Destroed\n";
         //  cout<<"Left: "<<--Count_<<endl;
     }
-    /**
-     * @brief increase generating ranges to produce more results
+    /*!
+     * \brief increase generating ranges to produce more results
      */
     static void increaseRanges();
-    /**
-     * @brief decrease generatirn ranges to produce less amount of results
+    /*!
+     * \brief decrease generatirn ranges to produce less amount of results
      */
     static void decreaseRanges();
 };
+/*!
+ * \brief The CustomToken class represents token with name
+ *
+ * Represents all nonliteral tokens \a name_ = string;
+ * string parsed to \a tree_
+ */
 class CustomToken : public BaseToken
 {
-    //token for named tokens
-    TreePtr tree_;
-    string name_;
-    size_t recurseDepth_;
-    size_t memFBC;
-    size_t memMCD;
-    size_t memMRD;
+    TreePtr     tree_;            ///corresponding token tree
+    std::string name_;            ///token name
+    size_t      recurseDepth_;    ///controls recursion call to avoid a=b;b=a;
+    size_t      memFBC_;          ///to control need of regeneration
+    size_t      memMCD_;          ///to control need of regeneration
+    size_t      memMRD_;          ///to control need of regeneration
+
 public:
-    CustomToken(const string &name, TreePtr mt):tree_(mt),name_(name),recurseDepth_(0){save();}
-    const string& name(){return name_;}
+    /*!
+     * \brief creates CustomToken
+     * \param name created token name
+     * \param mt created token tree
+     */
+    CustomToken(const std::string &name, TreePtr mt):tree_(mt),name_(name),recurseDepth_(0){save();}
+    const std::string& name(){return name_;}
     void setMain(TreePtr mt){tree_=mt;}
     void setChild(BasePtr) override {}
     void resetChild(BasePtr) override {}
-    void proc(ResultType &rt) override ;
+    void proc(StringList &rt) override ;
+    /*!
+     * \brief save current generating state
+     */
     void save()
     {
-        memFBC =  FigureBraceRepeatCount;
-        memMCD = MaxConcatenationDepth;
-        memMRD =  MaxRecursionDepth;
+        memFBC_ =  FigureBraceRepeatCount;
+        memMCD_ = MaxConcatenationDepth;
+        memMRD_ =  MaxRecursionDepth;
     }
-
+    /*!
+     * \brief ifChanged checks if generating state changed
+     * \return true if generating state changed
+     */
     bool ifChanged()
     {
-        if(memFBC !=  FigureBraceRepeatCount ||
-                memMCD != MaxConcatenationDepth||
-                memMRD !=  MaxRecursionDepth)
+        if(memFBC_ !=  FigureBraceRepeatCount ||
+                memMCD_ != MaxConcatenationDepth||
+                memMRD_ !=  MaxRecursionDepth)
             return false;
         else return true;
     }
+
     bool checkType(char) const override {return false;}
     bool checkChildType(char)const override {return false;}
     size_t preCount() override ;
@@ -159,7 +172,7 @@ public:
         other->setChild(this->right_);
         this->right_ = other;
     }
-     bool checkChildType(char c)const override {return right_->checkType(c);}
+    bool checkChildType(char c)const override {return right_->checkType(c);}
 };
 
 
@@ -169,33 +182,26 @@ public:
 
     //token that need to set pryority of operation
     //simple call child proc
-    void proc(ResultType &rt) override
+    void proc(StringList &rt) override
     {
         if(child_) child_->proc(rt);
-        else throw myException("Arg child_ not set in BraceToken");
+        else throw DGException("Arg child_ not set in BraceToken");
     }
     size_t preCount() override
     {
-        if(child_)return child_->preCount();
-        else return 0;
+        if(child_) return child_->preCount();
+		else throw DGException("Arg child_ not set in RoundBraceToken");
     }
     bool checkType(char c) const override {return c==')'||c=='(';}
 };
 class ConcatToken : public TwoArgToken
 {
 public:
-    void proc(ResultType &rt) override ;
+    void proc(StringList &rt) override ;
     size_t preCount() override
     {
-        size_t rp =right_->preCount(), lp=left_->preCount();
-
-        size_t lrStep = lp/(2*MaxConcatenationDepth);
-        if(lrStep==0) lrStep=1;
-
-        size_t rrStep = rp*2/MaxConcatenationDepth;
-        if(rrStep==0) rrStep=1;
-
-        return (lp/lrStep)*(rp/rrStep);
+		if (left_ && right_) return std::max(right_->preCount(), left_->preCount());
+		else throw DGException("args not set in ConcatToken");   
     }
     bool checkType(char c) const override {return c==',';}
 };
@@ -223,13 +229,14 @@ public:
     virtual void setChild(BasePtr) override {}
     virtual void resetChild(BasePtr) override {}
     //its a literal, just add text_ to result
-    void proc(ResultType &rt) override
+    void proc(StringList &rt) override
     {
-        if(!text_.empty()) rt.push_back(text_);
+        //if(!text_.empty()) 
+		rt.push_back(text_);
     }
     size_t preCount() override {return 1;}
     bool checkType(char) const override {return false;}
-     bool checkChildType(char)const override {return false;}
+    bool checkChildType(char)const override {return false;}
 };
 
 class SquareBraceToken:public OneArgToken{
@@ -237,41 +244,51 @@ class SquareBraceToken:public OneArgToken{
 public:
 
     //adds 1 or nothing
-    void proc(ResultType &rt) override
+    void proc(StringList &rt) override
     {
         if(child_)
         {
             child_->proc(rt);
             rt.push_back("");
         }
-        else throw myException("Arg child_ not set in SquareBraceToken");
+        else throw DGException("Arg child_ not set in SquareBraceToken");
     }
-    size_t preCount() override {return child_->preCount()+1;}
+	size_t preCount() override 
+	{ 
+		if (child_) return child_->preCount() + 1;
+		else throw DGException("Arg child_ not set in SquareBraceToken");
+	}
     bool checkType(char c) const override {return c==']'||c=='[';}
 };
 class FigureBraceToken:public OneArgToken{
 public:
 
-    void proc(ResultType &rt) override ;
+    void proc(StringList &rt) override ;
     size_t preCount() override
     {
-        auto s = child_->preCount();
-        return min(s,FigureBraceDepth)*FigureBraceRepeatCount+s;
+        //auto s = child_->preCount();
+        //return min(s,FigureBraceDepth)*FigureBraceRepeatCount+s;
+		if (child_) return child_->preCount()*FigureBraceDepth + 1;
+		else throw DGException("Arg child_ not set in FigureBraceToken");
     }
     bool checkType(char c) const override {return c=='}'||c=='{';}
 };
 class OrToken : public TwoArgToken
 {
 public:
-    void proc(ResultType &rt) override
+    void proc(StringList &rt) override
     {
         if(left_ && right_){
             right_->proc(rt);
             left_->proc(rt);
         }
-        else throw myException("args not set in OrToken");
+        else throw DGException("args not set in OrToken");
     }
-    size_t preCount() override {return right_->preCount()+left_->preCount();}
+    size_t preCount() override 
+	{
+		if (left_ && right_) return right_->preCount()+left_->preCount();
+		else throw DGException("args not set in OrToken");
+	}
     bool checkType(char c) const override {return c=='|';}
 };
 

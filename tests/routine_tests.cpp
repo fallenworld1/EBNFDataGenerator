@@ -5,10 +5,19 @@
 
 
 TEST(RoutinesTest,advanceTest)
-{   using routines::advance_;
+{   
+	using namespace routines;
     std::string tested("12345");
-    auto begin = tested.begin(),end = tested.end();
-    ASSERT_FALSE(advance_(begin,end,10))<<"Advance out of range(10)";
+	auto begin = tested.begin(), end = begin, it = begin;
+	ASSERT_FALSE(advance_(begin, end, 10)) << "Advance begin = end";
+	ASSERT_THROW(advanceOver(begin, begin, end, 10), DGException) << "Bad advance Over";
+	end = tested.end();
+	ASSERT_FALSE(advance_(it, end, 10)) << "Advance out of range(10)";
+	ASSERT_EQ(it, end) << "Advance out of range(10)";
+
+	advanceOver(it, begin, end, 2);
+	ASSERT_EQ(it, begin+2) << "Advance out of range(10)";
+
     begin = tested.begin();
     ASSERT_FALSE(advance_(begin,end,6))<<"Advance out of range(6)";
     begin = tested.begin();
@@ -35,7 +44,7 @@ TEST(RoutinesTest,readEcqSequenceTest)
     input.emplace_back("\"");
 
     symbol.push_back('\x99');
-    symbol.push_back(253);
+    symbol.push_back(char(253));
     symbol.push_back('\"');
 
     auto inputI = begin(input),inputEnd = end(input);
@@ -45,7 +54,7 @@ TEST(RoutinesTest,readEcqSequenceTest)
     {
 
         std::string result;
-        routines::constStrIt begin=inputI->begin(),end = inputI->end();
+        constStrIt begin=inputI->begin(),end = inputI->end();
 
         routines::readEcqSequence(begin,end,result);
 
@@ -56,6 +65,7 @@ TEST(RoutinesTest,readEcqSequenceTest)
 
 TEST(RoutinesTest,readLiteralTest)
 {
+//	ASSERT_THROW()
     std::vector<std::string> input;
     std::vector<std::string> testedOutput;
 
@@ -74,7 +84,7 @@ TEST(RoutinesTest,readLiteralTest)
     {
 
         std::string result;
-        routines::constStrIt begin=inputI->begin(),end = inputI->end();
+        constStrIt begin=inputI->begin(),end = inputI->end();
 
         routines::readLiteralName(begin,end,result);
 
@@ -98,13 +108,54 @@ TEST(RoutinesTest,throwingTest)
     using namespace routines;
     std::string s;
     constStrIt begin=s.begin(),end=s.end();
-    ASSERT_THROW(readLiteralName(begin,end,s),myException);
-    ASSERT_THROW(readEcqSequence(begin,end,s),myException);
+    ASSERT_THROW(readLiteralName(begin,end,s),DGException);
+    ASSERT_THROW(readEcqSequence(begin,end,s),DGException);
     s.append("\\1");
     begin=s.begin();
     end=s.end();
-    ASSERT_THROW(readLiteralName(begin,end,s),myException);
+    ASSERT_THROW(readLiteralName(begin,end,s),DGException);
     s.append("urvr7hty897j7t6");
-    ASSERT_THROW(readLiteralName(begin,end,s),myException);
+    ASSERT_THROW(readLiteralName(begin,end,s),DGException);
 }
 
+TEST(RoutinesTest, DGExceptionTestTest)
+{
+	using namespace routines;
+	try
+	{
+		throw DGException("word", '!');
+	}
+	catch (std::exception &e)
+	{
+		ASSERT_EQ(std::string(e.what()),std::string("word<!>")) << "DGException(str, lit) test";
+	}
+	try
+	{
+		throw DGException("word", '!',100);
+	}
+	catch (std::exception &e)
+	{
+		ASSERT_EQ(std::string(e.what()), std::string("word<!> at 100")) << "DGException(str, lit) test";
+	}
+}
+TEST(RoutinesTest, ConcatNRandUnitTest)
+{
+	using namespace routines;
+	std::vector<std::string> numbers;
+	std::string result;
+	//auto b = std::begin(numbers), end = std::end(numbers);
+	ASSERT_THROW(ConcatNRandUnit(10, numbers, result), DGException) << "Empty container check";
+	numbers.emplace_back("1");
+	ConcatNRandUnit(5, numbers, result);
+	ASSERT_EQ(result, "11111");
+}
+TEST(RoutinesTest, MainTokenNameGuardTest)
+{
+	std::string name = "main";
+	{
+		routines::MainTokenNameGuard mg(name);
+		name = "other";
+		ASSERT_EQ(name, "other");
+	}
+	ASSERT_EQ(name, "main");
+}

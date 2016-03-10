@@ -1,8 +1,9 @@
 build
+msvs
 */doc/*
 *.user*
 *.autosave
-
+.gitattributes
 !*.cpp
 !*.h
 !*.pro
