@@ -54,7 +54,7 @@ TEST(RoutinesTest,readEcqSequenceTest)
     {
 
         std::string result;
-        constStrIt begin=inputI->begin(),end = inputI->end();
+        ConstStrIt begin=inputI->begin(),end = inputI->end();
 
         routines::readEcqSequence(begin,end,result);
 
@@ -84,7 +84,7 @@ TEST(RoutinesTest,readLiteralTest)
     {
 
         std::string result;
-        constStrIt begin=inputI->begin(),end = inputI->end();
+        ConstStrIt begin=inputI->begin(),end = inputI->end();
 
         routines::readLiteralName(begin,end,result);
 
@@ -107,7 +107,7 @@ TEST(RoutinesTest,throwingTest)
 {
     using namespace routines;
     std::string s;
-    constStrIt begin=s.begin(),end=s.end();
+    ConstStrIt begin=s.begin(),end=s.end();
     ASSERT_THROW(readLiteralName(begin,end,s),DGException);
     ASSERT_THROW(readEcqSequence(begin,end,s),DGException);
     s.append("\\1");

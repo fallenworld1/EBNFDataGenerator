@@ -5,14 +5,36 @@
 #include "policy.h"
 
 
-
 /*!
  * \brief The Tree class represents AST tree of EBNF grammar
  */
 class Tree
 {
-    using CTContainer = std::vector<std::shared_ptr<CustomToken> >;//Custom Tokens Container
+   // friend class TreeBuilder;
+    enum Literals
+    {
+        QUOTES              = '\"',
+        CONCAT              = ',' ,
+        OR                  = '|' ,
+        OPEN_ROUND_BRACE    = '(' ,
+        OPEN_SQUARE_BRACE   = '[' ,
+        OPEN_FIGURE_BRACE   = '{' ,
+        CRBRACE             = ')' ,
+        CSBRACE             = ']' ,
+        CFBRACE             = '}' ,
+        NAME_BODY_DELIMETR  = '=' ,
+        TOKENS_DELIMETR     = ';' ,
+        COMMENT             = '#' ,
+        SPACE               = ' ' ,
+        TAB                 = '\t',
+        CARRIAGE_RETURN_WIN = '\r',
+        CARRIAGE_RETURN     = '\n',
+        UNDERSCORE          = '_'
 
+
+    };
+
+   using CTContainer = std::vector<std::shared_ptr<CustomToken> >;///Custom Tokens Container
 
     BasePtr     top_;           /// top of this tree
     StringList  result_;        /// generated results
@@ -24,11 +46,21 @@ class Tree
     PolicyPtr   addingPolicy_;  /// what elements add to the results
 
     void        adjustResults();/// adjusts results adds dictionary
+
+
+
+    void insignificant(ConstStrIt &it);
 public:
     /*!
      * \brief Tree constructs empty tree
      */
-    Tree():treeValid_(false),canChange_(false),addingPolicy_(std::make_shared<DefaultPolicy>()){}
+    Tree():
+        treeValid_(false),
+        canChange_(false),
+        addingPolicy_(std::make_shared<DefaultPolicy>())
+    {
+
+    }
 
     Tree(const Tree& other)          =delete;
     Tree operator=(const Tree& other)=delete;
@@ -46,7 +78,8 @@ public:
      *
      * builds tree from pos \a begin  of \a expr to end(\a expr) or ';'
      */
-    void buildTree(const std::string &expr, constStrIt &begin);
+    void buildTree(const std::string &expr, ConstStrIt &begin);
+   // void buildTreeWithBuilder(const std::string &expr, ConstStrIt &begin);
     /*!
      * \brief generate
      * \param reGenerate
@@ -93,6 +126,8 @@ public:
      */
     bool canChange()                                const {  return canChange_;   }
 };
+
+
 
 #endif //TREE
 

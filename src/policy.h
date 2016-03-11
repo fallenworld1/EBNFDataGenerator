@@ -62,20 +62,33 @@ public:
 /*!
  * \brief The NoNamePolicy class allow elements whith lengthes near average
  */
-class NoNamePolicy: public AddingPolicy
+class NearAveragePolicy: public AddingPolicy
 {
     double defaultAverageSize_ ;
     double averageSize_;
-    size_t elemCount   = 0;
+    double range_;
+    size_t elemCount   = 1;
 
     void add(double size);///adds size to average
 
 public:
-    NoNamePolicy(double defaultASize = 0.0);
+    NearAveragePolicy(double defaultASize = 0.0, double range = 2.0);
 
-    virtual void update(const StringList &d);
-    virtual bool check(const std::string &elem);
+    virtual void update(const StringList &d)override;
+    virtual bool check(const std::string &elem)override;
     void refresh() override;
+};
+class MaxPolicy: public AddingPolicy
+{
+    size_t maxSize_;
+public:
+    MaxPolicy(size_t maxSize):maxSize_(maxSize){}
+    virtual void update(const StringList &)override{}
+    virtual bool check(const std::string &elem)override
+    {
+        return elem.size()<=maxSize_;
+    }
+    void refresh() override{}
 };
 
 #endif // POLICY

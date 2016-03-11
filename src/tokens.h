@@ -108,7 +108,7 @@ public:
      * \param name created token name
      * \param mt created token tree
      */
-    CustomToken(const std::string &name, TreePtr mt):tree_(mt),name_(name),recurseDepth_(0){save();}
+    CustomToken(const std::string &name, TreePtr mt):tree_(mt),name_(name),recurseDepth_(0){/*save();*/}
     const std::string& name(){return name_;}
     void setMain(TreePtr mt){tree_=mt;}
     void setChild(BasePtr) override {}
@@ -117,24 +117,24 @@ public:
     /*!
      * \brief save current generating state
      */
-    void save()
+   /* void save()
     {
         memFBC_ =  FigureBraceRepeatCount;
         memMCD_ = MaxConcatenationDepth;
         memMRD_ =  MaxRecursionDepth;
-    }
+    }*/
     /*!
      * \brief ifChanged checks if generating state changed
      * \return true if generating state changed
      */
-    bool ifChanged()
+    /*bool ifChanged()
     {
         if(memFBC_ !=  FigureBraceRepeatCount ||
                 memMCD_ != MaxConcatenationDepth||
                 memMRD_ !=  MaxRecursionDepth)
             return false;
         else return true;
-    }
+    }*/
 
     bool checkType(char) const override {return false;}
     bool checkChildType(char)const override {return false;}

@@ -9,12 +9,14 @@ CONFIG -= app_bundle
 
 
 SOURCES += \
-    ../src/routines.cpp \
     routine_tests.cpp \
     tokenstest.cpp \
+    tree_tests.cpp \
     ../src/tokens.cpp \
     ../src/tree.cpp \
-    tree_tests.cpp
+    ../src/routines.cpp \
+    parser_tests.cpp \
+    ../src/parser.cpp
 
 INCLUDEPATH+= ../src
 

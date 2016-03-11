@@ -3,7 +3,7 @@
 #undef _DEB
 namespace routines{
 
-void readLiteralName(constStrIt &begin, const constStrIt &end, std::string &out)
+void readLiteralName(ConstStrIt &begin, const ConstStrIt &end, std::string &out)
 {
     if(begin == end) throw DGException("unexpected end of string");
     while(*(begin)!='\"')
@@ -15,7 +15,7 @@ void readLiteralName(constStrIt &begin, const constStrIt &end, std::string &out)
 }
 
 
-void readEcqSequence(constStrIt &begin, const constStrIt &end, std::string &out)
+void readEcqSequence(ConstStrIt &begin, const ConstStrIt &end, std::string &out)
 {
     unsigned char symbol;
     if(begin == end) throw DGException("unexpected end of string");

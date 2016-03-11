@@ -39,6 +39,7 @@ public:
      * \return results of parsing
      */
     const TreesContainer & resultsOfParsing(){return customTokenTrees_;}
+   // void parse2(const std::string &expr);
 };
 
 #endif // PARSER_H

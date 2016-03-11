@@ -142,7 +142,7 @@ void removeSpaces(std::string &str);
  *
  * reads ESQ-sequens (\<x>,\xNN,\NNN) from \a begin to \a end and store to \a out
  */
-void readEcqSequence(constStrIt &begin, const constStrIt &end, std::string &out);
+void readEcqSequence(ConstStrIt &begin, const ConstStrIt &end, std::string &out);
 /*!
  * \brief readLiteralName
  * \param begin
@@ -152,7 +152,7 @@ void readEcqSequence(constStrIt &begin, const constStrIt &end, std::string &out)
  * reads sequence of character from \a begin to '"' or \a end and store to \a out
  * parse ESQ-sequence if found '\'
  */
-void readLiteralName(constStrIt &begin, const constStrIt &end, std::string &out);
+void readLiteralName(ConstStrIt &begin, const ConstStrIt &end, std::string &out);
 
 
 //void loadDictionaryFromFile(const std::string &tokenName,const std::string & fileName,Parser &p);

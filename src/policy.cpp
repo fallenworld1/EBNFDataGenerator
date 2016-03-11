@@ -2,27 +2,27 @@
 #include <time.h>
 
 
-void NoNamePolicy::add(double size)
+void NearAveragePolicy::add(double size)
 {
     averageSize_ = (averageSize_ * elemCount + size)/(elemCount+1);
     ++elemCount;
 }
 
-NoNamePolicy::NoNamePolicy(double defaultASize):defaultAverageSize_(defaultASize),averageSize_(defaultASize)
+NearAveragePolicy::NearAveragePolicy(double defaultASize,double range):defaultAverageSize_(defaultASize),averageSize_(defaultASize),range_(range)
 {
     srand(clock());
 }
 
-void NoNamePolicy::update(const StringList &d)
+void NearAveragePolicy::update(const StringList &d)
 {
     for(auto &elem:d) add(static_cast<double>(elem.size()));
     defaultAverageSize_ = averageSize_;
 }
 
-bool NoNamePolicy::check(const std::string &elem)
+bool NearAveragePolicy::check(const std::string &elem)
 {
     double elemSize = static_cast<double>(elem.size());
-    if(elemSize<averageSize_*2.0)
+    if(elemSize < averageSize_*range_)
     {
         add(elemSize);
         return true;
@@ -40,10 +40,10 @@ bool NoNamePolicy::check(const std::string &elem)
 
 }
 
-void NoNamePolicy::refresh()
+void NearAveragePolicy::refresh()
 {
     averageSize_ = defaultAverageSize_;
-    elemCount   = 0;
+    elemCount   = 1;
 }
 
 void MinMaxPolicy::update(const StringList &dictionary)

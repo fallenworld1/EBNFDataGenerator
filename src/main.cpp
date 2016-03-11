@@ -44,9 +44,6 @@ void showCorrespondingResults(StringList &rt,std::ostream &os,size_t count)
 
 
 
-//tests for tree
-// | had priority for ,
-//многопоточно делать конкатенацию и фигурные скобки
 
 int main()
 {
@@ -65,6 +62,25 @@ int main()
         expr.append(" ");
         expr.append(temp);
     }
+    /*Parser p1,p2;
+    long double average1 = 0.0,average2 = 0.0;
+    for(int i=1;i<5000;++i)
+    {
+        start = std::chrono::steady_clock::now();
+        p1.parse(expr);
+        delta = std::chrono::steady_clock::now() - start;
+        average1= ((average1*i)+delta.count())/(i+1);
+
+        start = std::chrono::steady_clock::now();
+        p2.parse2(expr);
+        delta = std::chrono::steady_clock::now() - start;
+        average2= ((average2*i)+delta.count())/(i+1);
+        cout<<i<<endl;
+    }
+
+    cout<<"switch: "<<average1<<" builder: "<<average2;
+    return 0;*/
+
     //std::chrono::duration<double> sec = std::chrono::steady_clock::now() - start;
     // cout<<"Time spent: "<<sec.count()<<std::endl;
     try
@@ -73,7 +89,8 @@ int main()
         //
         Generator generator;
         generator.getTokens(expr,Parser());
-        generator.setAddingPolicy(std::make_shared<NoNamePolicy>(3.0));
+        generator.setAddingPolicy("word",std::make_shared<NearAveragePolicy>(6.0,2.0));
+        generator.setAddingPolicy("rule",std::make_shared<MaxPolicy>(50));
         //generator.setMainTokenName("grammar");
 
        // loadDictionaryFromFile("word","words",generator);
