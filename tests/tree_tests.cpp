@@ -5,8 +5,8 @@
 TEST(TreeTests, EmptyTreeTest)
 {
 	Tree tree;
-	ASSERT_FALSE(tree.generate(true));
-	ASSERT_FALSE(tree.generate(false));
+    ASSERT_THROW(tree.generate(true),routines::DGException);
+    ASSERT_THROW(tree.generate(false),routines::DGException);
     ASSERT_FALSE(tree.canChange());
 	auto r = tree.getResults();
     ASSERT_TRUE(r.empty());
@@ -26,7 +26,7 @@ TEST(TreeTests, SimpleSuccessParsingTest)
     tree.buildTree(expr,it);
     ASSERT_FALSE(tree.canChange());
     ASSERT_EQ(it,expr.end());
-    ASSERT_TRUE(tree.generate(true));
+    tree.generate(true);
     auto r = tree.getResults();
     ASSERT_EQ(r.size(),1);
     ASSERT_EQ(r[0],"1");
@@ -41,55 +41,91 @@ TEST(TreeTests, SimpleFailParsingTest)
     using namespace std;
 
     string error("main");
-
+    Tree tree;
     try
     {
-          Tree tree;
+
           tree.buildTree(error,begin(error));
     }
     catch(exception &e)
     {
-       ASSERT_EQ(string(e.what()),"Unexpected end of string.");
+       ASSERT_EQ(string(e.what()),"Tree::buildTree error. Unexpected end of string.");
+       ASSERT_FALSE(tree.isValid())<<"Tree::buildTree error. Tree valid after exception";
     }
     error = "main main=";
     try
     {
-          Tree tree;
-          tree.buildTree(error,begin(error));
+        tree.buildTree(error,begin(error));
     }
     catch(exception &e)
     {
-       ASSERT_EQ(string(e.what()),"Wrong syntax near main");
+        ASSERT_EQ(string(e.what()),"Tree::buildTree error. Wrong syntax near main");
+        ASSERT_FALSE(tree.isValid())<<"Tree::buildTree error. Tree valid after exception";
     }
     error = "main=main=";
     try
     {
-          Tree tree;
-          tree.buildTree(error,begin(error));
+        tree.buildTree(error,begin(error));
     }
     catch(exception &e)
     {
-       ASSERT_EQ(string(e.what()),"Unexpected occurence of: <=> at 9");
+        ASSERT_EQ(string(e.what()),"Tree::buildTree error. Unexpected occurence of: <=> at 9");
+        ASSERT_FALSE(tree.isValid())<<"Tree::buildTree error. Tree valid after exception";
     }
     error = "(}";
     try
     {
-          Tree tree;
-          tree.buildTree(error,begin(error));
+        tree.buildTree(error,begin(error));
     }
     catch(exception &e)
     {
-       ASSERT_EQ(string(e.what()),"Wrong closing brace: <}> at 1");
+        ASSERT_EQ(string(e.what()),"Tree::buildTree error. Wrong closing brace: <}> at 1");
+        ASSERT_FALSE(tree.isValid())<<"Tree::buildTree error. Tree valid after exception";
     }
     error = "*";
     try
     {
-          Tree tree;
           tree.buildTree(error,begin(error));
     }
     catch(exception &e)
     {
-       ASSERT_EQ(string(e.what()),"Wrong literal: <*> at 0");
+        ASSERT_EQ(string(e.what()),"Tree::buildTree error. Wrong literal: <*> at 0");
+        ASSERT_FALSE(tree.isValid())<<"Tree::buildTree error. Tree valid after exception";
     }
 
+}
+TEST(TreeTests, GeneratingTest)
+{
+    Tree tree;
+    std::string expr = "a={[\"1\"]|[\"2\"]};";
+    tree.buildTree(expr,std::begin(expr));
+    ASSERT_TRUE(tree.isValid());
+    tree.generate(true);
+    auto results = tree.getResults();
+    for(auto &r:results){
+       ASSERT_TRUE((r.empty()
+                    || std::find(std::begin(r),std::end(r),'1')!=std::end(r)
+                    || std::find(std::begin(r),std::end(r),'2')!=std::end(r)));
+       ASSERT_LE(r.size(),4);
+    }
+    StringList dictionary;
+    dictionary.emplace_back("3");
+    dictionary.emplace_back("4");
+    tree.setDictionary(dictionary);
+    ASSERT_TRUE(tree.isValid());
+    tree.generate(true);
+    results = tree.getResults();
+    for(auto &d:dictionary){
+       ASSERT_NE(std::find(std::begin(results),std::end(results),d),std::end(results));
+    }
+    tree.setPolicy(std::make_shared<MinMaxPolicy>(0,2));
+    ASSERT_TRUE(tree.isValid());
+    tree.generate(true);
+    results = tree.getResults();
+    for(auto &d:dictionary){
+       ASSERT_NE(std::find(std::begin(results),std::end(results),d),std::end(results));
+    }
+    for(auto &r:results){
+       ASSERT_LE(r.size(),2);
+    }
 }

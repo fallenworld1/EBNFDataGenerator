@@ -16,7 +16,10 @@ SOURCES += \
     ../src/tree.cpp \
     ../src/routines.cpp \
     parser_tests.cpp \
-    ../src/parser.cpp
+    ../src/parser.cpp \
+    ../src/policy.cpp \
+    ../src/generator.cpp \
+    generator_tests.cpp
 
 INCLUDEPATH+= ../src
 

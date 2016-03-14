@@ -268,7 +268,7 @@ public:
     {
         //auto s = child_->preCount();
         //return min(s,FigureBraceDepth)*FigureBraceRepeatCount+s;
-		if (child_) return child_->preCount()*FigureBraceDepth + 1;
+                if (child_) return child_->preCount()*(FigureBraceDepth/FigureBraceStep) + 1;
 		else throw DGException("Arg child_ not set in FigureBraceToken");
     }
     bool checkType(char c) const override {return c=='}'||c=='{';}

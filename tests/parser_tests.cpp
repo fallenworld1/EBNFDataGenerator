@@ -20,17 +20,19 @@ TEST(ParserTests, parsingStringTest)
     }
     catch(std::exception &e)
     {
-        ASSERT_EQ(std::string(e.what()),"Token <quotes> not defined!");
+        ASSERT_EQ(std::string(e.what()),"Parser::link error. Token <quotes> not defined.");
     }
-    str = "quotes = a;quotes = a;";
+    str = " quotes = a; quotes = a; ";
     try
     {
         parser.parse(str);
     }
     catch(std::exception &e)
     {
-        ASSERT_EQ(std::string(e.what()),"Token <quotes> is implemented more than once!");
+        ASSERT_EQ(std::string(e.what()),"Parser::parse error. Token <quotes> is implemented more than once.");
     }
+    str = "a=;";
+    ASSERT_NO_THROW(parser.parse(str));
     str.clear();
     ASSERT_THROW(parser.parse(str),routines::DGException);
 }
