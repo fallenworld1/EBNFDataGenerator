@@ -13,7 +13,7 @@ void Parser::link()
             }
             catch(...)
             {
-              throw DGException("Token <"+token->name()+"> not defined!");
+              throw DGException("Parser::link error. Token <"+token->name()+"> not defined.");
             }
         }
     }
@@ -28,7 +28,7 @@ void Parser::parse(const std::string &expr)
         std::shared_ptr<Tree> mt = std::make_shared<Tree>();
         mt->buildTree(expr,begin);
         auto result = customTokenTrees_.insert(make_pair(mt->name(),mt));
-        if(result.second == false) throw DGException("Token <"+mt->name()+"> is implemented more than once!");
+        if(result.second == false) throw DGException("Parser::parse error. Token <"+mt->name()+"> is implemented more than once.");
     }
     link();
     

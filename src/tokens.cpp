@@ -12,7 +12,7 @@ void ConcatToken::proc(StringList &rt)
 {
     using namespace std;
 
-    if(!left_ || !right_) throw DGException("args not set ConcatToken");
+    if(!left_ || !right_) throw DGException("ConcatToken::proc error. Args not set.");
 
     StringList rr,lr;
     right_->proc(rr);
@@ -114,16 +114,16 @@ void ConcatToken::proc(StringList &rt)
 void FigureBraceToken::proc(StringList &rt)
 {
     using namespace std;
-	if (!child_) throw DGException("arg not set FigureBraceToken");
+    if (!child_) throw DGException("FigureBraceToken::proc error. Arg not set.");
     StringList temp;
 
     child_->proc(temp);
     if(temp.empty()) return;
     //child_->proc(rt);
-	size_t	addingCount = FigureBraceStep;				 ///count of stacked element              
+    size_t	addingCount = FigureBraceStep;				 ///count of stacked element
     
     
-	string tempStr;							 ///stacked elements
+    string tempStr;							 ///stacked elements
     rt.push_back("");						 ///{} represens 0(!) or more elements
     rt.insert(end(rt),begin(temp),end(temp));///1element
     while(addingCount<FigureBraceDepth)
@@ -161,15 +161,12 @@ void CustomToken::proc(StringList &rt)
         if(tree_)
         {
 
-            if(tree_->generate(/*ifChanged()*/true))
-            {
-                //save();
-                auto &r = tree_->getResults();
-                rt.insert(end(rt),begin(r),end(r));
-            }
-            else DGException("Error generating: "+name_);
+            tree_->generate(/*ifChanged()*/true);
+            auto &r = tree_->getResults();
+            rt.insert(end(rt),begin(r),end(r));
+
         }
-        else throw DGException("token: "+name_+"not defined");
+        else throw DGException("CustomToken::proc error. Token: "+name_+" have no Tree.");
     }
     --recurseDepth_;
 }
@@ -181,11 +178,12 @@ size_t CustomToken::preCount()
     if(recurseDepth_<=MaxRecursionDepth)
     {
         if(tree_)result =  tree_->preCount();
-		else throw DGException("Tree not set in CustomToken "+ name_);
+        else throw DGException("CustomToken::preCount error. Tree not set in CustomToken "+ name_);
     }
     --recurseDepth_;
     return result;
 }
+
 
 
 void BaseToken::increaseRanges()
@@ -204,5 +202,7 @@ void BaseToken::decreaseRanges()
     //if(MaxRecursionDepth>DefaultMaxRecursionDepth)--MaxRecursionDepth;
     if(FigureBraceDepth>DefaultFigureBraceDepth)--FigureBraceDepth;
 }
+
+
 
 

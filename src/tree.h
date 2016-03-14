@@ -10,7 +10,7 @@
  */
 class Tree
 {
-   // friend class TreeBuilder;
+    // friend class TreeBuilder;
     enum Literals
     {
         QUOTES              = '\"',
@@ -30,11 +30,9 @@ class Tree
         CARRIAGE_RETURN_WIN = '\r',
         CARRIAGE_RETURN     = '\n',
         UNDERSCORE          = '_'
-
-
     };
 
-   using CTContainer = std::vector<std::shared_ptr<CustomToken> >;///Custom Tokens Container
+    using CTContainer = std::vector<std::shared_ptr<CustomToken> >;///Custom Tokens Container
 
     BasePtr     top_;           /// top of this tree
     StringList  result_;        /// generated results
@@ -44,22 +42,20 @@ class Tree
     bool        canChange_ ;    /// indicates this tree had randomisation in generating
     StringList  dictionary_;    /// user defined values this tree can generate
     PolicyPtr   addingPolicy_;  /// what elements add to the results
-
-    void        adjustResults();/// adjusts results adds dictionary
-
-
-
-    void insignificant(ConstStrIt &it);
+    /*!
+     * \brief adjustResults \a rt
+     * \param [in/out] rt adjustable results
+     *
+     * add dictionary_ and aply addingPolicy_ to rt;
+     */
+    void adjustResults(StringList &rt);/// adjusts results \a rt adds dictionary
 public:
     /*!
      * \brief Tree constructs empty tree
      */
-    Tree():
-        treeValid_(false),
-        canChange_(false),
-        addingPolicy_(std::make_shared<DefaultPolicy>())
+    Tree()
     {
-
+        refresh();
     }
 
     Tree(const Tree& other)          =delete;
@@ -79,15 +75,21 @@ public:
      * builds tree from pos \a begin  of \a expr to end(\a expr) or ';'
      */
     void buildTree(const std::string &expr, ConstStrIt &begin);
-   // void buildTreeWithBuilder(const std::string &expr, ConstStrIt &begin);
+    // void buildTreeWithBuilder(const std::string &expr, ConstStrIt &begin);
     /*!
      * \brief generate
      * \param reGenerate
-     * \return
+     * \throw routines::DGException if errors occur
      * generates results if \a reGenerate true
      */
-    bool generate(bool reGenerate);
-
+    void generate(bool reGenerate);
+    /*!
+        * \brief generateAndGet for async generation
+        * \param [out] rt container to store results
+        *
+        * generates results in \a rt using only on stack memory. Can be used to asynk using;
+        */
+    void generateAndGet(StringList &rt);
     /*!
      * \brief setDictionary sets current dictionary to \a d
      * \param d new dictionary
@@ -96,14 +98,18 @@ public:
     {
         dictionary_ = d;
         addingPolicy_->update(d);
+        result_.clear();
     }
     /*!
      * \brief setPolicy sets \a addingPolicy_ to \a newPolicy
      * \param newPolicy user defined policy(derrived from Policy)
      */
     void setPolicy(PolicyPtr newPolicy){
-        addingPolicy_ = newPolicy;
-        addingPolicy_->update(dictionary_);
+        if(newPolicy)//if pointer to null was passed
+        {
+            addingPolicy_ = newPolicy;
+            addingPolicy_->update(dictionary_);
+        }
     }
     /*!
      * \brief getResults
@@ -125,6 +131,15 @@ public:
      * \return copy canChange_ flag
      */
     bool canChange()                                const {  return canChange_;   }
+    /*!
+     * \brief isValid getter func to Tree::treeValid_
+     * \return Tree::treeValid_ true - if this tree can generate results
+     */
+    bool isValid()                                  const {  return treeValid_;   }
+    /*!
+     * \brief refresh this tree
+     */
+    void refresh();
 };
 
 

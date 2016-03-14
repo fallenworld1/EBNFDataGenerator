@@ -5,12 +5,12 @@ namespace routines{
 
 void readLiteralName(ConstStrIt &begin, const ConstStrIt &end, std::string &out)
 {
-    if(begin == end) throw DGException("unexpected end of string");
+    if(begin == end) throw DGException("routines::readLiteralName error. Unexpected end of string.");
     while(*(begin)!='\"')
     {
         if(*begin=='\\')readEcqSequence(++begin,end,out);
         else out.push_back(*begin++);
-        if(begin == end) throw DGException("unexpected end of string");
+        if(begin == end) throw DGException("routines::readLiteralName error. Unexpected end of string.");
     }
 }
 
@@ -18,7 +18,7 @@ void readLiteralName(ConstStrIt &begin, const ConstStrIt &end, std::string &out)
 void readEcqSequence(ConstStrIt &begin, const ConstStrIt &end, std::string &out)
 {
     unsigned char symbol;
-    if(begin == end) throw DGException("unexpected end of string");
+    if(begin == end) throw DGException("routines::readEcqSequence error. Unexpected end of string.");
     if(*begin=='x' && begin<end-2)
     {
         char symbolString[3] = {0};

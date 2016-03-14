@@ -30,7 +30,7 @@ public:
         DefaultMaxConcatenationDepth  = 5, // amount of multiplying steps
         DefaultMaxRecursionDepth      = 3  // to protect from left recursion
     };
-	
+
 
     BaseToken()
     {
@@ -117,7 +117,7 @@ public:
     /*!
      * \brief save current generating state
      */
-   /* void save()
+    /* void save()
     {
         memFBC_ =  FigureBraceRepeatCount;
         memMCD_ = MaxConcatenationDepth;
@@ -139,6 +139,7 @@ public:
     bool checkType(char) const override {return false;}
     bool checkChildType(char)const override {return false;}
     size_t preCount() override ;
+
 };
 class OneArgToken:public BaseToken
 {
@@ -164,7 +165,7 @@ protected:
 public:
     void setChild(BasePtr child) override
     {
-        if(left_==nullptr) left_=child;
+        if(!left_) left_=child;
         else right_ = child;
     }
     void resetChild(BasePtr other) override
@@ -172,7 +173,11 @@ public:
         other->setChild(this->right_);
         this->right_ = other;
     }
-    bool checkChildType(char c)const override {return right_->checkType(c);}
+    bool checkChildType(char c)const override
+    {
+        if(right_)return right_->checkType(c);
+        else return false;
+    }
 };
 
 
@@ -190,7 +195,7 @@ public:
     size_t preCount() override
     {
         if(child_) return child_->preCount();
-		else throw DGException("Arg child_ not set in RoundBraceToken");
+        else throw DGException("Arg child_ not set in RoundBraceToken");
     }
     bool checkType(char c) const override {return c==')'||c=='(';}
 };
@@ -200,8 +205,8 @@ public:
     void proc(StringList &rt) override ;
     size_t preCount() override
     {
-		if (left_ && right_) return std::max(right_->preCount(), left_->preCount());
-		else throw DGException("args not set in ConcatToken");   
+        if (left_ && right_) return std::max(right_->preCount(), left_->preCount());
+        else throw DGException("args not set in ConcatToken");
     }
     bool checkType(char c) const override {return c==',';}
 };
@@ -231,8 +236,8 @@ public:
     //its a literal, just add text_ to result
     void proc(StringList &rt) override
     {
-        //if(!text_.empty()) 
-		rt.push_back(text_);
+        //if(!text_.empty())
+        rt.push_back(text_);
     }
     size_t preCount() override {return 1;}
     bool checkType(char) const override {return false;}
@@ -253,11 +258,11 @@ public:
         }
         else throw DGException("Arg child_ not set in SquareBraceToken");
     }
-	size_t preCount() override 
-	{ 
-		if (child_) return child_->preCount() + 1;
-		else throw DGException("Arg child_ not set in SquareBraceToken");
-	}
+    size_t preCount() override
+    {
+        if (child_) return child_->preCount() + 1;
+        else throw DGException("Arg child_ not set in SquareBraceToken");
+    }
     bool checkType(char c) const override {return c==']'||c=='[';}
 };
 class FigureBraceToken:public OneArgToken{
@@ -268,8 +273,8 @@ public:
     {
         //auto s = child_->preCount();
         //return min(s,FigureBraceDepth)*FigureBraceRepeatCount+s;
-		if (child_) return child_->preCount()*FigureBraceDepth + 1;
-		else throw DGException("Arg child_ not set in FigureBraceToken");
+        if (child_) return child_->preCount()*(FigureBraceDepth/FigureBraceStep) + 1;
+        else throw DGException("Arg child_ not set in FigureBraceToken");
     }
     bool checkType(char c) const override {return c=='}'||c=='{';}
 };
@@ -284,12 +289,13 @@ public:
         }
         else throw DGException("args not set in OrToken");
     }
-    size_t preCount() override 
-	{
-		if (left_ && right_) return right_->preCount()+left_->preCount();
-		else throw DGException("args not set in OrToken");
-	}
+    size_t preCount() override
+    {
+        if (left_ && right_) return right_->preCount()+left_->preCount();
+        else throw DGException("args not set in OrToken");
+    }
     bool checkType(char c) const override {return c=='|';}
+
 };
 
 #endif // BASETOKEN_H

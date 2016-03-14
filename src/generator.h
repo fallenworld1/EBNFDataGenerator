@@ -40,7 +40,7 @@ public:
       * try generate \a count of results in \a attemptCount of attempts
       * default generate without checking
       */
-     bool generate(size_t count, int attemptCout = -1);
+     void generate(size_t count = 0, int attemptCout = -1);
      /*!
       * \brief generate list of results(ResultType) for only \a customTokenName
       * \param customTokenName token result of which we want to generate
@@ -49,7 +49,7 @@ public:
       * \return true if success, false otherwise
       * \throws if token whith \a customTokenName doesnt exists
       */
-     bool generate(std::string customTokenName, size_t count, int attemptCout = -1);
+     void generate(std::string customTokenName, size_t count = 0, int attemptCout = -1);
      /*!
       * \brief setMainTokenName
       * \param [in] s new name
@@ -86,6 +86,11 @@ public:
       * \param [in] policy new policy
       */
      void setAddingPolicy(PolicyPtr policy);
+     /*!
+      * \brief setDictionary sets dictionary \a d for all trees
+      * \param [in] d new dictionary
+      */
+     void setDictionary(const StringList &d);
      /*!
       * \brief getTokens parse \a expr whith \a parser and copy tokens
       * \param [in] expr string to parse

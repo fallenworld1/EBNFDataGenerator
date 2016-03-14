@@ -46,27 +46,27 @@ void NearAveragePolicy::refresh()
     elemCount   = 1;
 }
 
-void MinMaxPolicy::update(const StringList &dictionary)
+void MinMaxDPolicy::update(const StringList &dictionary)
 {
     if(dictionary.empty())
     {
-        min =  0;
-        max = -1;
+        min_ =  0;
+        max_ = -1;
         return;
     }
     else
     {
-        min = dictionary.front().size();
-        max = min;
+        min_ = dictionary.front().size();
+        max_ = min_;
     }
     for(const auto &elem:dictionary)
     {
-        if(elem.size() < min) min = elem.size();
-        else if(elem.size() > max) max = elem.size();
+        if(elem.size() < min_) min_ = elem.size();
+        else if(elem.size() > max_) max_ = elem.size();
     }
 }
 
-bool MinMaxPolicy::check(const std::string &elem)
+bool MinMaxDPolicy::check(const std::string &elem)
 {
-    return (elem.size() > max) || (elem.size() < min);
+    return (elem.size() > max_) || (elem.size() < min_);
 }

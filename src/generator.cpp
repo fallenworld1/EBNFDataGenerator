@@ -15,7 +15,7 @@ void Generator::setDictionary(const std::string &customTokenName,const StringLis
     }
     catch(...)
     {
-        throw DGException("Error while setting dictionary. Custom token <"+customTokenName+"> not found");
+        throw DGException("Generator::setDictionary error. Error while setting dictionary. Custom token <"+customTokenName+"> not found");
     }
 }
 
@@ -28,12 +28,17 @@ void Generator::setAddingPolicy(const std::string &customTokenName, PolicyPtr po
     }
     catch(...)
     {
-        throw DGException("Error while setting dictionary. Custom token <"+customTokenName+"> not found");
+        throw DGException("Generator::setAddingPolicy error. Error while setting dictionary. Custom token <"+customTokenName+"> not found");
     }
 }
 void Generator::setAddingPolicy(PolicyPtr policy)
 {
     for(auto &tree:customTokenTrees_) tree.second->setPolicy(policy);
+}
+
+void Generator::setDictionary(const StringList &d)
+{
+    for(auto &tree:customTokenTrees_) tree.second->setDictionary(d);
 }
 
 void Generator::getTokens(const std::string &expr, Parser &parser)
@@ -51,7 +56,7 @@ bool Generator::checkSize(size_t checked,size_t passed)
     return correct;
 }
 
-bool Generator::generate(size_t count,int attemptCout)
+void Generator::generate(size_t count,int attemptCout)
 {
     TreePtr tree;
     try
@@ -60,32 +65,34 @@ bool Generator::generate(size_t count,int attemptCout)
     }
     catch(...)
     {
-        throw DGException("Not find token: <"+mainTokenName_+">");
+        throw DGException("Generator::generate error. Not find token: <"+mainTokenName_+">");
     }
 
-    if(!tree)  throw routines::DGException(mainTokenName_+" suddenly have no tree assosiated with");
+    if(!tree)  throw routines::DGException("Generator::generate error. Token "+mainTokenName_+" suddenly have no tree assosiated with");
 
     if(attemptCout<0)
     {
-        if(!tree->generate(true)) throw DGException("Generating error");
-         result_= tree->getResults();
-        return true;
-    }
-    do
-    {
-        if(checkSize(tree->preCount(),count))
-        {
-            if(!tree->generate(true)) throw DGException("Generating error");
-            result_= tree->getResults();
-            return true;
-        }
+        tree->generate(true);
+        result_= tree->getResults();
 
     }
-    while(--attemptCout>0);
-    return false;
+    else
+    {
+        do
+        {
+            if(checkSize(tree->preCount(),count))
+            {
+                tree->generate(true);
+                result_= tree->getResults();
+                return;
+            }
+
+        }
+        while(--attemptCout>0);
+    }
 }
 
-bool Generator::generate(std::string customTokenName, size_t count, int attemptCout)
+void Generator::generate(std::string customTokenName, size_t count, int attemptCout)
 {
     routines::MainTokenNameGuard mtng(mainTokenName_);
     mainTokenName_ = customTokenName;

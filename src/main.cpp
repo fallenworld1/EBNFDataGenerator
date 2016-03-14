@@ -85,17 +85,17 @@ int main()
     // cout<<"Time spent: "<<sec.count()<<std::endl;
     try
     {
-        cout<<"Parsing..."<<endl;
+        //cout<<"Parsing..."<<endl;
         //
         Generator generator;
         generator.getTokens(expr,Parser());
-        generator.setAddingPolicy("word",std::make_shared<NearAveragePolicy>(6.0,2.0));
-        generator.setAddingPolicy("rule",std::make_shared<MaxPolicy>(50));
+        //generator.setAddingPolicy("word",std::make_shared<NearAveragePolicy>(6.0,2.0));
+        //generator.setAddingPolicy("rule",std::make_shared<MaxPolicy>(50));
         //generator.setMainTokenName("grammar");
 
        // loadDictionaryFromFile("word","words",generator);
         //generator.setAddingPolicy("word",std::make_shared<MinMaxPolicy>());
-        //
+
         std::string command;
         int attempts;
         while(1)
@@ -108,10 +108,9 @@ int main()
 
                 cin >>attempts;
 
-                cout<<"Generating..."<<endl;
+                cout<<"Generating...\n";
                  start = std::chrono::steady_clock::now();
-                if(!generator.generate(command,resultsCount,attempts))
-                    generator.generate(command,resultsCount);
+                generator.generate(command,resultsCount,attempts);
                 StringList results = generator.getResults();
                 showCorrespondingResults(results,ofs,results.size());
                 delta = std::chrono::steady_clock::now() - start;
@@ -123,7 +122,7 @@ int main()
                 cerr<<e.what()<<endl;
             }
         }
-        /*   start = std::chrono::steady_clock::now();
+         /*   start = std::chrono::steady_clock::now();
        if(!parser.generate(resultsCount,500))
            parser.generate(resultsCount);
        sec = std::chrono::steady_clock::now() - start;

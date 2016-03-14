@@ -48,15 +48,26 @@ public:
  * \brief The MinMaxPolicy class allows only elements with lengthes more than min dictionary element length and
  * less than max
  */
-class MinMaxPolicy:public AddingPolicy
+class MinMaxDPolicy:public AddingPolicy
 {
-    size_t min;
-    size_t max;
+    size_t min_;
+    size_t max_;
 public:
 
     void update(const StringList &dictionary) override;
     void refresh() override{}
     bool check(const std::string &elem) override;
+
+};
+class MinMaxPolicy:public AddingPolicy
+{
+    size_t min_;
+    size_t max_;
+public:
+    MinMaxPolicy(size_t min=0,size_t max=-1):min_(min),max_(max){}
+    void update(const StringList &) override{}
+    void refresh() override{}
+    bool check(const std::string &elem) override{return elem.size()>=min_ && elem.size()<=max_;}
 
 };
 /*!
@@ -78,18 +89,5 @@ public:
     virtual bool check(const std::string &elem)override;
     void refresh() override;
 };
-class MaxPolicy: public AddingPolicy
-{
-    size_t maxSize_;
-public:
-    MaxPolicy(size_t maxSize):maxSize_(maxSize){}
-    virtual void update(const StringList &)override{}
-    virtual bool check(const std::string &elem)override
-    {
-        return elem.size()<=maxSize_;
-    }
-    void refresh() override{}
-};
-
 #endif // POLICY
 

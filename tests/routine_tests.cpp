@@ -36,73 +36,40 @@ TEST(RoutinesTest,removeSpacesTest)
 
 TEST(RoutinesTest,readEcqSequenceTest)
 {
-    std::vector<std::string> input;
-    std::vector<char> symbol;
-
-    input.emplace_back("x99");
-    input.emplace_back("253");
-    input.emplace_back("\"");
-
-    symbol.push_back('\x99');
-    symbol.push_back(char(253));
-    symbol.push_back('\"');
-
-    auto inputI = begin(input),inputEnd = end(input);
-    auto symbolI = begin(symbol),symbolEnd = end(symbol);
-
-    for(;inputI != inputEnd && symbolI != symbolEnd; ++inputI,++symbolI)
+    auto test = [](const std::string &input,const char output)
     {
-
         std::string result;
-        ConstStrIt begin=inputI->begin(),end = inputI->end();
+        ConstStrIt begin=std::begin(input),end = std::end(input);
 
         routines::readEcqSequence(begin,end,result);
 
-        ASSERT_EQ(*symbolI,result[0])<<*inputI<<"=="<<result;
-    }
+        ASSERT_EQ(output,result[0])<<output<<"=="<<result;
+    };
+    test("x99",'\x99');
+    test("253",char(253));
+    test("\"",'\"');
+
+
 }
 
 
 TEST(RoutinesTest,readLiteralTest)
 {
-//	ASSERT_THROW()
-    std::vector<std::string> input;
-    std::vector<std::string> testedOutput;
-
-    input.emplace_back("abc\"");
-    input.emplace_back("фыва\"");
-    input.emplace_back("\\\"aab\\\"\"");
-
-    testedOutput.push_back("abc");
-    testedOutput.push_back("фыва");
-    testedOutput.push_back("\"aab\"");
-
-    auto inputI = begin(input),inputEnd = end(input);
-    auto testedI = begin(testedOutput),testedEnd = end(testedOutput);
-
-    for(;inputI != inputEnd && testedI != testedEnd; ++inputI,++testedI)
+    auto test = [](const std::string &input,const std::string &output)
     {
-
         std::string result;
-        ConstStrIt begin=inputI->begin(),end = inputI->end();
+        ConstStrIt begin=std::begin(input),end = std::end(input);
 
         routines::readLiteralName(begin,end,result);
 
-        ASSERT_EQ(*testedI,result)<<*inputI<<"=="<<result;
-    }
-}
-/*
-void RoutinesTester::readLiteralTest_data()
-{
-    QTest::addColumn<QString>("input");
-    QTest::addColumn<QString>("output");
+        ASSERT_EQ(output,result)<<output<<"=="<<result;
+    };
 
-    QTest::newRow("simple literal")<<"abc\""<<"abc";
-
-    QTest::newRow("russian literal")<<"фыва\""<<"фыва";
-    QTest::newRow("literal whith commas")<<"\\\"aab\\\"\""<<"\"aab\"";
+    test("abc\"","abc");
+    test("фыва\"","фыва");
+    test("\\\"aab\\\"\"","\"aab\"");
 }
-*/
+
 TEST(RoutinesTest,throwingTest)
 {
     using namespace routines;
