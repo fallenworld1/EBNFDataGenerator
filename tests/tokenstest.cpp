@@ -61,8 +61,10 @@ TEST_F(ServiceClass,orTokenTest)
     tt2->proc(tested);
     
 	ASSERT_THROW(o.proc(result),DGException) << "Childs not set";
+	ASSERT_THROW(o.preCount(), DGException) << "Childs not set";
     o.setChild(tt2);//tt2 goes left
 	ASSERT_THROW(o.proc(result), DGException) << "Childs not set";
+	ASSERT_THROW(o.preCount(), DGException) << "Childs not set";
     o.setChild(tt1);//tt1 goes right
 
 	o.proc(result);
@@ -77,6 +79,7 @@ TEST_F(ServiceClass,figureBraceTokenTest)
     StringList result,tested;
     std::string message;
 	ASSERT_THROW(fbt.proc(result), DGException) << "Childs not set";
+	ASSERT_THROW(fbt.preCount(), DGException) << "Childs not set";
 	tested.emplace_back("");
 	tt1->proc(tested);
 	
@@ -112,8 +115,10 @@ TEST_F(ServiceClass, concatToken)
 	temp[0] += temp[1];
 
 	ASSERT_THROW(cct.proc(result), DGException) << "Childs not set";
+	ASSERT_THROW(cct.preCount(), DGException) << "Childs not set";
 	cct.setChild(tt1);
 	ASSERT_THROW(cct.proc(result), DGException) << "Childs not set";
+	ASSERT_THROW(cct.preCount(), DGException) << "Childs not set";
     cct.setChild(tt2);
     cct.proc(result);
 
@@ -125,6 +130,7 @@ TEST_F(ServiceClass, SquareBraceTokenTest)
 	SquareBraceToken sbt;
 	StringList result, temp;
 	ASSERT_THROW(sbt.proc(result), DGException) << "Childs not set";
+	ASSERT_THROW(sbt.preCount(), DGException) << "Childs not set";
 	tt1->proc(temp);
 	temp.emplace_back("");
 	sbt.setChild(tt1);
@@ -132,4 +138,5 @@ TEST_F(ServiceClass, SquareBraceTokenTest)
 	ASSERT_EQ(result[0], temp[0]);
 	ASSERT_EQ(result[1], temp[1]);
 }
+
 

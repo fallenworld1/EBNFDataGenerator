@@ -39,8 +39,12 @@ void Tree::buildTree(const string &expr, ConstStrIt &begin)
     {
         while(1)
         {
-            if(begin == end) throw DGException("Tree::buildTree error. Unexpected end of string.");
-
+            if(begin == end)
+            {
+                if(tokenStack.size() || name_.size() || (bool)lastToken || customTokens_.size())
+                    throw DGException("Tree::buildTree error. Unexpected end of string.");
+                else return;
+            }
             switch(*begin)
             {
             case QUOTES:

@@ -131,31 +131,56 @@ void ConcatNRandUnit(size_t count,const Container &from, std::string &result){
 
 /*!
  * \brief remove spaces from \a str
- * \param str
+ * \param [in] str string to process
  */
 void removeSpaces(std::string &str);
 /*!
- * \brief readEcqSequence
- * \param begin
- * \param end
- * \param out
+ * \brief reads ESQ-sequence
+ * \param [in]  begin begin of string to parse from
+ * \param [in]  end end of string to parse from
+ * \param [out] out string to store result
  *
  * reads ESQ-sequens (\<x>,\xNN,\NNN) from \a begin to \a end and store to \a out
  */
 void readEcqSequence(ConstStrIt &begin, const ConstStrIt &end, std::string &out);
 /*!
- * \brief readLiteralName
- * \param begin
- * \param end
- * \param out
+ * \brief Reads literal name
+ * \param [in]  begin begin of string to parse from
+ * \param [in]  end end of string to parse from
+ * \param [out] out string to store result
  *
  * reads sequence of character from \a begin to '"' or \a end and store to \a out
  * parse ESQ-sequence if found '\'
  */
 void readLiteralName(ConstStrIt &begin, const ConstStrIt &end, std::string &out);
 
+class Generator;
+/*!
+ * \brief loads dictionary from file
+ * \param [in] tokenName name of Tree to set Dictionary
+ * \param [in] fileName name of file to load strings
+ * \param [in] g generator where \a tokenName is
+ *
+ * loads dictionary in token(in generator \a g) \a tokenName
+ */
+void loadDictionaryFromFile(const std::string &tokenName,const std::string & fileName,Generator &g);
+/*!
+ * \brief prints \a count elements of \a rt to \a os
+ * \param [in] rt list to copy from
+ * \param [in] os stream to copy to
+ * \param [in] count count of elemts to copy
+ */
+void showResults(const StringList &rt,std::ostream &os,size_t count);
+/*!
+ * \brief Shows Corresponding Results
+ * \param [in] rt list to copy from
+ * \param [in] os os stream to copy to
+ * \param [in] count count count of elemts to copy
+ *
+ * sort rt in ascending order and call showResults
+ */
+void showCorrespondingResults(StringList &rt,std::ostream &os,size_t count);
 
-//void loadDictionaryFromFile(const std::string &tokenName,const std::string & fileName,Parser &p);
 }
 #endif // ROUTINES_H
 

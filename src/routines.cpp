@@ -1,17 +1,24 @@
 #include "routines.h"
 #include <cctype>
-#undef _DEB
+#include <iostream>
+#include <fstream>
+#include <string>
+#include "generator.h"
+
+
 namespace routines{
 
 void readLiteralName(ConstStrIt &begin, const ConstStrIt &end, std::string &out)
 {
     if(begin == end) throw DGException("routines::readLiteralName error. Unexpected end of string.");
+    std::string result;
     while(*(begin)!='\"')
     {
-        if(*begin=='\\')readEcqSequence(++begin,end,out);
-        else out.push_back(*begin++);
+        if(*begin=='\\')readEcqSequence(++begin,end,result);
+        else result.push_back(*begin++);
         if(begin == end) throw DGException("routines::readLiteralName error. Unexpected end of string.");
     }
+    out.insert(std::end(out),std::begin(result),std::end(result));
 }
 
 
@@ -42,6 +49,44 @@ void removeSpaces(std::string &str)
 {
     using namespace std;
     str.erase(remove_if(begin(str),end(str),[](char c){return isspace(c);}),end(str));
+}
+
+void loadDictionaryFromFile(const std::string &tokenName, const std::string &fileName, ::Generator &g)
+{
+    using namespace std;
+
+    ifstream ifs(fileName);
+    StringList dictionary;
+    string word;
+    while(!ifs.eof())
+    {
+        ifs>>word;
+        dictionary.emplace_back(move(word));
+    }
+    g.setDictionary(tokenName,dictionary);
+}
+
+void showResults(const StringList &rt, std::ostream &os, size_t count)
+{
+
+    os<<"results("<<rt.size()<<")\n";
+    for(auto &s:rt)
+    {
+        const char *str = s.c_str();
+        os<<str<<std::endl;
+        if(--count==0) break;
+    }
+    os<<"end"<<std::endl;
+}
+
+void showCorrespondingResults(StringList &rt, std::ostream &os, size_t count)
+{
+    std::sort(
+                rt.begin(),
+                rt.end(),
+                [](const std::string &l,const std::string &r){return l.size()<r.size();}
+    );
+    showResults(rt,os,count);
 }
 
 }

@@ -1,4 +1,5 @@
 #include "generator.h"
+#include "routines.h"
 #include <gtest/gtest.h>
 
 
@@ -23,21 +24,25 @@ TEST(GeneratorTests, SimpleGeneratingTest)
     ASSERT_EQ(res[0],"");
     ASSERT_EQ(res[2],"aaa");
     ASSERT_EQ(res[4],"a");
+
     gen.generate("figure_brace");
     res = gen.getResults();
     ASSERT_EQ(res[0],"");
     ASSERT_EQ(res[1],"a");
     ASSERT_EQ(res[3],"aaaaa");
+
     gen.generate("quotes",1,1);
     res = gen.getResults();
     ASSERT_EQ(res[0],"a");
     ASSERT_EQ(res.size(),1);
+
     gen.generate("round_brace");
     res = gen.getResults();
     ASSERT_EQ(res[0],"a");
     ASSERT_EQ(res.size(),1);
     ASSERT_THROW(gen.generate(),routines::DGException);
     ASSERT_THROW(gen.generate("NotExistedName"),routines::DGException);
+
 	gen.setAddingPolicy(std::make_shared<MinMaxPolicy>(1, 3));
 	gen.generate("or");
 	res = gen.getResults();
@@ -47,11 +52,16 @@ TEST(GeneratorTests, SimpleGeneratingTest)
 		ASSERT_LE(r.size(), 3);
 	}
 	StringList dict{ "1", "2" };
+
 	gen.setDictionary("quotes",dict);
 	gen.generate("or");
 	res = gen.getResults();
-	for (auto &d : dict){
+    for (auto &d : dict)
+    {
 		ASSERT_NE(std::find(std::begin(res), std::end(res), d), std::end(res));
 	}
 
+    str = "a=b;b=a;";
+    gen.getTokens(str,Parser());
+    ASSERT_NO_FATAL_FAILURE(gen.generate("a"));
 }

@@ -35,6 +35,8 @@ TEST(TreeTests, SimpleSuccessParsingTest)
     auto n = tree.name();
     ASSERT_EQ(n,"main");
 
+
+
 }
 TEST(TreeTests, SimpleFailParsingTest)
 {
@@ -60,6 +62,7 @@ TEST(TreeTests, SimpleFailParsingTest)
     test(tree, "main=main=","Tree::buildTree error. Unexpected occurence of: <=> at 9");
     test(tree, "(}",        "Tree::buildTree error. Wrong closing brace: <}> at 1"    );
     test(tree, "*",         "Tree::buildTree error. Wrong literal: <*> at 0"          );
+    //test(tree, "*",         "Tree::buildTree error. Wrong literal: <*> at 0"          );
 }
 TEST(TreeTests, GeneratingTest)
 {
@@ -95,4 +98,25 @@ TEST(TreeTests, GeneratingTest)
     for(auto &r:results){
         ASSERT_LE(r.size(),2);
     }
+}
+TEST(TreeTests, CustomTokenTest)
+{
+	TreePtr tree= std::make_shared<Tree>();
+	StringList result,expect;
+	std::string expr = "a=\"1\"|\"2\";";
+	tree->buildTree(expr, std::begin(expr));
+	CustomToken ct("main",nullptr);
+	ASSERT_THROW(ct.proc(result), DGException) << "Childs not set";
+	ASSERT_THROW(ct.preCount(), DGException) << "Childs not set";
+	ASSERT_FALSE(ct.checkType('s'));
+	ASSERT_FALSE(ct.checkChildType('s'));
+	ASSERT_EQ(ct.name(), "main");
+	ct.setMain(tree);
+	ASSERT_EQ(ct.preCount(), tree->preCount());
+	tree->generate(true);
+	expect = tree->getResults();
+	ct.proc(result);
+	ASSERT_EQ(result.size(), expect.size());
+	for (int i = 0; i < result.size(); ++i)
+		ASSERT_EQ(result[i], expect[i]);
 }

@@ -2,7 +2,31 @@
 //#include <time.h>
 Generator::Generator()
 {
-    //setMainTokenName("main");
+    setMainTokenName("grammar");
+}
+
+Generator::Generator(const Generator &other)
+{
+    result_           = other.result_;
+    customTokenTrees_ = other.customTokenTrees_;
+    mainTokenName_    = other.mainTokenName_;
+}
+
+Generator& Generator::operator=(const Generator &other)
+{
+   Generator that(other);
+   swap(that);
+   return *this;
+}
+Generator::Generator(Generator &&other)
+{
+    swap(other);
+}
+
+Generator& Generator::operator=(Generator &&other)
+{
+   swap(other);
+   return *this;
 }
 
 
@@ -56,46 +80,47 @@ bool Generator::checkSize(size_t checked,size_t passed)
     return correct;
 }
 
-void Generator::generate(size_t count,int attemptCout)
+void Generator::swap(Generator &other)
 {
-    TreePtr tree;
+    result_.swap(other.result_);
+    customTokenTrees_.swap(other.customTokenTrees_);
+    mainTokenName_.swap(other.mainTokenName_);
+}
+
+
+
+void Generator::generate(const std::string &customTokenName, size_t count, int attemptCout)
+{
+    TreePtr p_Tree;
     try
     {
-        tree = customTokenTrees_.at(mainTokenName_);
+        p_Tree = customTokenTrees_.at(customTokenName);
     }
     catch(...)
     {
         throw DGException("Generator::generate error. Not find token: <"+mainTokenName_+">");
     }
 
-    if(!tree)  throw routines::DGException("Generator::generate error. Token "+mainTokenName_+" suddenly have no tree assosiated with");
+    if(!p_Tree)  throw routines::DGException("Generator::generate error. Token "+mainTokenName_+" suddenly have no tree assosiated with");
 
     if(attemptCout<0)
     {
-        tree->generate(true);
-        result_= tree->getResults();
+        p_Tree->generate(true);
+        result_= p_Tree->getResults();
 
     }
     else
     {
         do
         {
-            if(checkSize(tree->preCount(),count))
+            if(checkSize(p_Tree->preCount(),count))
             {
-                tree->generate(true);
-                result_= tree->getResults();
+                p_Tree->generate(true);
+                result_= p_Tree->getResults();
                 return;
             }
 
         }
         while(--attemptCout>0);
     }
-}
-
-void Generator::generate(std::string customTokenName, size_t count, int attemptCout)
-{
-    routines::MainTokenNameGuard mtng(mainTokenName_);
-    mainTokenName_ = customTokenName;
-    return generate(count,attemptCout);
-
 }

@@ -68,21 +68,27 @@ TEST(RoutinesTest,readLiteralTest)
     test("abc\"","abc");
     test("фыва\"","фыва");
     test("\\\"aab\\\"\"","\"aab\"");
+    test("\"","");
 }
 
 TEST(RoutinesTest,throwingTest)
 {
     using namespace routines;
-    std::string s;
+    std::string s,out;
     ConstStrIt begin=s.begin(),end=s.end();
-    ASSERT_THROW(readLiteralName(begin,end,s),DGException);
+    ASSERT_THROW(readLiteralName(begin,end,out),DGException);
+    ASSERT_THROW(readEcqSequence(begin,end,out),DGException);
     ASSERT_THROW(readEcqSequence(begin,end,s),DGException);
-    s.append("\\1");
+    s = "\\1";
     begin=s.begin();
     end=s.end();
-    ASSERT_THROW(readLiteralName(begin,end,s),DGException);
-    s.append("urvr7hty897j7t6");
-    ASSERT_THROW(readLiteralName(begin,end,s),DGException);
+    ASSERT_THROW(readLiteralName(begin,end,out),DGException);
+    ASSERT_THROW(readEcqSequence(begin,end,s),DGException);
+    s = "\\1urvr7hty897j7t6";
+    begin=s.begin();
+    end=s.end();
+    ASSERT_THROW(readLiteralName(begin,end,out),DGException);
+    ASSERT_THROW(readEcqSequence(begin,end,s),DGException);
 }
 
 TEST(RoutinesTest, DGExceptionTestTest)

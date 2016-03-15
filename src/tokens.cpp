@@ -41,72 +41,6 @@ void ConcatToken::proc(StringList &rt)
         if(++rrIt == rrEnd) rrIt = rrBegin;
 
     }
-
-
-
-    /*
-
-    size_t lrStep, rrStep;
-
-    lrStep = lr.size()/(MaxConcatenationDepth);
-    if(lrStep==0) lrStep=1;
-
-    rrStep = rr.size()/MaxConcatenationDepth;
-    if(rrStep==0) rrStep=1;
-
-    auto lrIt = begin(lr),lrEnd = end(lr),rrEnd = end(rr);
-
-    if(lr.size()>rr.size())
-    {
-
-        advance_(lrIt,lrEnd,rand()%lrStep);
-        do
-        {
-            auto rrIt = begin(rr);
-            advance_(rrIt,rrEnd,rand()%rrStep);
-            do
-            {
-                rt.push_back(move(*lrIt+*rrIt));
-            }
-            while(advance_(rrIt,rrEnd,rand()%rrStep*2+1));
-        }
-        while(advance_(lrIt,lrEnd,rand()%lrStep*2+1));
-        auto rrIt = begin(rr);
-        while(rrIt!=rrEnd)
-        {
-             rt.emplace_back(move(*lrIt+*rrIt));
-             ++lrIt;
-             ++rrIt;
-            // if(rrIt==rrEnd)rrIt = begin(rr);
-        }
-    }
-    else
-    {
-       auto rrIt = begin(rr);
-       while(lrIt!=lrEnd)
-       {
-            rt.emplace_back(move(*lrIt+*rrIt));
-            ++lrIt;
-            ++rrIt;
-       }
-      /* if(find(lr.begin(),lr.end(),"") != lrEnd)
-       {
-           rt.insert(rt.end(),rrIt,rrEnd);
-       }
-       else
-       {
-           lrIt = begin(lr);
-           while(rrIt!=rrEnd)
-           {
-                rt.emplace_back(move(*lrIt+*rrIt));
-                ++lrIt;
-                ++rrIt;
-                if(lrIt==lrEnd)lrIt = begin(lr);
-           }
-       }
-    }*/
-
-
 }
 
 
@@ -136,27 +70,13 @@ void FigureBraceToken::proc(StringList &rt)
         }
         addingCount+=FigureBraceStep;
     }
-    /*do
-    {
-        do
-        {
-            ConcatNRandUnit(addingCount,temp,tempStr);//insert addingCount rand elements from temp in tempStr
-            rt.emplace_back(std::move(tempStr));
-            //tempStr.clear();
-        }
-        while(--countOfReproduced);
-        addingCount+=FigureBraceStep;
-        countOfReproduced = defaultCountOfReproduced;
-    }
-    while(++repeatCount<FigureBraceRepeatCount);//6*/
-
 }
 
 
 void CustomToken::proc(StringList &rt)
 {
-    ++recurseDepth_;
-    if(recurseDepth_<=MaxRecursionDepth)
+    DepthAcceptor da(*this);
+    if(da)
     {
         if(tree_)
         {
@@ -168,19 +88,17 @@ void CustomToken::proc(StringList &rt)
         }
         else throw DGException("CustomToken::proc error. Token: "+name_+" have no Tree.");
     }
-    --recurseDepth_;
 }
 
 size_t CustomToken::preCount()
 {
-    ++recurseDepth_;
+    DepthAcceptor da(*this);
     size_t result = 0;
-    if(recurseDepth_<=MaxRecursionDepth)
+    if(da)
     {
         if(tree_)result =  tree_->preCount();
         else throw DGException("CustomToken::preCount error. Tree not set in CustomToken "+ name_);
     }
-    --recurseDepth_;
     return result;
 }
 

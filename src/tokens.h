@@ -95,9 +95,28 @@ public:
  */
 class CustomToken : public BaseToken
 {
+    size_t      recurseDepth_;    ///controls recursion call to avoid a=b;b=a;
+
+    /*!
+     * \brief The DepthAcceptor class automate depth check
+     *
+     * generating like this vulnerable to situation:
+     * a = b;b = a;
+     * cause ulimited call to b->proc(),a->proc()
+     * this checks call amount on stack
+     */
+    class DepthAcceptor
+    {
+        CustomToken &ct_;
+    public:
+        DepthAcceptor(CustomToken &ct):ct_(ct){++ct_.recurseDepth_;}
+        ~DepthAcceptor(){--ct_.recurseDepth_;}
+        operator bool() const {return ct_.recurseDepth_<=BaseToken::MaxRecursionDepth;}
+    };
+
     TreePtr     tree_;            ///corresponding token tree
     std::string name_;            ///token name
-    size_t      recurseDepth_;    ///controls recursion call to avoid a=b;b=a;
+
     size_t      memFBC_;          ///to control need of regeneration
     size_t      memMCD_;          ///to control need of regeneration
     size_t      memMRD_;          ///to control need of regeneration

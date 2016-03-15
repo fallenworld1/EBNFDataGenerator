@@ -8,20 +8,12 @@
  */
 class Generator
 {
-    /*!
-     * \brief result_ list of generated results
-     */
-    StringList result_;
-    /*!
-     * \brief customTokenTrees_ map of custom token names to custom token trees
-     */
-    TreesContainer customTokenTrees_;
-    /*!
-     * \brief mainTokenName_ name of main token
-     *
-     * first custom token building tree starts from
-     */
-    std::string mainTokenName_;
+
+    StringList result_;/// \brief result_ list of generated results
+    TreesContainer customTokenTrees_;/// \brief customTokenTrees_ map of custom token names to custom token trees
+
+    std::string mainTokenName_; /// \brief mainTokenName_ name of main token(default used);
+
     /*!
      * \brief size check function
      * \param checked tested size
@@ -29,8 +21,19 @@ class Generator
      * \return true is \a checked is in range 10% of \a passed
      */
     bool checkSize(size_t checked, size_t passed);
+    void swap(Generator &other);
 public:
+    /*!
+     * \brief Generator default constructor
+     *
+     * constructs default generator with empty tree
+     */
     Generator();
+    Generator(const Generator &other);/// Copy \a other to this
+    Generator& operator=(const Generator& other);/// Assign \a other to this
+    Generator(Generator &&other);/// Move \a other to this
+    Generator& operator=(Generator&& other);/// Move-assign \a other to this
+
     /*!
       * \brief generate results
       * \param count
@@ -40,7 +43,7 @@ public:
       * try generate \a count of results in \a attemptCount of attempts
       * default generate without checking
       */
-     void generate(size_t count = 0, int attemptCout = -1);
+    void generate(size_t count = 0, int attemptCout = -1){return generate(mainTokenName_,count,attemptCout);}
      /*!
       * \brief generate list of results(ResultType) for only \a customTokenName
       * \param customTokenName token result of which we want to generate
@@ -49,7 +52,7 @@ public:
       * \return true if success, false otherwise
       * \throws if token whith \a customTokenName doesnt exists
       */
-     void generate(std::string customTokenName, size_t count = 0, int attemptCout = -1);
+     void generate(const std::string &customTokenName, size_t count = 0, int attemptCout = -1);
      /*!
       * \brief setMainTokenName
       * \param [in] s new name
@@ -95,6 +98,8 @@ public:
       * \brief getTokens parse \a expr whith \a parser and copy tokens
       * \param [in] expr string to parse
       * \param [in] parser
+      *
+      * install new token trees that \a parser produce from \a expr string
       */
      void getTokens(const std::string &expr,Parser &parser);
 
