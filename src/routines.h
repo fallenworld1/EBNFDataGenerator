@@ -9,7 +9,25 @@
 namespace routines{
 
 
-
+/*!
+ * \brief The DepthAcceptor class automate depth check
+ *
+ * generating like this vulnerable to situation:
+ * a = b;b = a;
+ * cause ulimited call to b->proc(),a->proc()
+ * this checks call amount on stack
+ */
+class DepthAcceptor
+{
+    size_t &var_;
+public:
+    DepthAcceptor(size_t &var):var_(var){++var_;}
+    ~DepthAcceptor(){--var_;}
+    operator size_t() const {return var_;}
+};
+/*!
+ * \brief The MainTokenNameGuard class used to restore main token name.
+ */
 class MainTokenNameGuard{
     std::string &mainTokenName_;
     std::string saved_;

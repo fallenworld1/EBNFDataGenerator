@@ -8,7 +8,7 @@
 
 
 using routines::DGException;
-
+using routines::DepthAcceptor;
 class BaseToken
 {
     //static int Count_;
@@ -19,6 +19,8 @@ protected:
     static size_t FigureBraceDepth;
     static size_t MaxRecursionDepth;
     static size_t FigureBraceStep;
+    static size_t TreeDepth;
+
 
 public:
 
@@ -97,22 +99,7 @@ class CustomToken : public BaseToken
 {
     size_t      recurseDepth_;    ///controls recursion call to avoid a=b;b=a;
 
-    /*!
-     * \brief The DepthAcceptor class automate depth check
-     *
-     * generating like this vulnerable to situation:
-     * a = b;b = a;
-     * cause ulimited call to b->proc(),a->proc()
-     * this checks call amount on stack
-     */
-    class DepthAcceptor
-    {
-        CustomToken &ct_;
-    public:
-        DepthAcceptor(CustomToken &ct):ct_(ct){++ct_.recurseDepth_;}
-        ~DepthAcceptor(){--ct_.recurseDepth_;}
-        operator bool() const {return ct_.recurseDepth_<=BaseToken::MaxRecursionDepth;}
-    };
+
 
     TreePtr     tree_;            ///corresponding token tree
     std::string name_;            ///token name
@@ -208,7 +195,11 @@ public:
     //simple call child proc
     void proc(StringList &rt) override
     {
-        if(child_) child_->proc(rt);
+        if(child_)
+        {
+            DepthAcceptor verticalControl(BaseToken::TreeDepth);
+            child_->proc(rt);
+        }
         else throw DGException("Arg child_ not set in BraceToken");
     }
     size_t preCount() override
@@ -272,6 +263,7 @@ public:
     {
         if(child_)
         {
+            DepthAcceptor verticalControl(BaseToken::TreeDepth);
             child_->proc(rt);
             rt.push_back("");
         }
@@ -303,6 +295,7 @@ public:
     void proc(StringList &rt) override
     {
         if(left_ && right_){
+            DepthAcceptor verticalControl(BaseToken::TreeDepth);
             right_->proc(rt);
             left_->proc(rt);
         }

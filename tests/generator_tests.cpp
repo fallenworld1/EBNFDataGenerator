@@ -21,20 +21,23 @@ TEST(GeneratorTests, SimpleGeneratingTest)
     gen.getTokens(str,Parser());
     gen.generate("or");
     auto res = gen.getResults();
+    ASSERT_GE(res.size(), 4);
     ASSERT_EQ(res[0],"");
     ASSERT_EQ(res[2],"aaa");
     ASSERT_EQ(res[4],"a");
 
     gen.generate("figure_brace");
     res = gen.getResults();
+    ASSERT_GE(res.size(), 3);
     ASSERT_EQ(res[0],"");
     ASSERT_EQ(res[1],"a");
     ASSERT_EQ(res[3],"aaaaa");
 
     gen.generate("quotes",1,1);
     res = gen.getResults();
-    ASSERT_EQ(res[0],"a");
     ASSERT_EQ(res.size(),1);
+    ASSERT_EQ(res[0],"a");
+
 
     gen.generate("round_brace");
     res = gen.getResults();

@@ -97,11 +97,13 @@ TEST_F(ServiceClass,figureBraceTokenTest)
 	fbt.setChild(tt1);
 	fbt.proc(result);
 
-	ASSERT_EQ(result.size(), tested.size());
-    for (int i = static_cast<int>(result.size()) - 1; i >= 0; --i)
-	{
-		ASSERT_EQ(result[i], tested[i]);
-	}
+        if(result.size() == tested.size())
+        {
+            for (int i = static_cast<int>(result.size()) - 1; i >= 0; --i)
+            {
+                ASSERT_EQ(result[i], tested[i]);
+            }
+        }else FAIL()<<"Result not equal tested: "<<result.size()<<" vs "<<tested.size();
 }
 TEST_F(ServiceClass, concatToken)
 {
