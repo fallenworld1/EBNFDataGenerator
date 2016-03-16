@@ -3,7 +3,7 @@
 
 #include "routines.h"
 #include "defines.h"
-
+#include <list>
 
 
 
@@ -161,7 +161,12 @@ public:
         other->setChild(child_);
         child_ = other;
     }
-    bool checkChildType(char c)const override {return child_->checkType(c);}
+    bool checkChildType(char c)const override
+    {
+        if(child_) return child_->checkType(c);
+        else return false;
+
+    }
 };
 class TwoArgToken:public BaseToken
 {
@@ -255,26 +260,21 @@ public:
 };
 
 class SquareBraceToken:public OneArgToken{
-
+    int probability_=50;
 public:
 
     //adds 1 or nothing
-    void proc(StringList &rt) override
-    {
-        if(child_)
-        {
-            DepthAcceptor verticalControl(BaseToken::TreeDepth);
-            child_->proc(rt);
-            rt.push_back("");
-        }
-        else throw DGException("Arg child_ not set in SquareBraceToken");
-    }
+    void proc(StringList &rt) override;
     size_t preCount() override
     {
         if (child_) return child_->preCount() + 1;
         else throw DGException("Arg child_ not set in SquareBraceToken");
     }
     bool checkType(char c) const override {return c==']'||c=='[';}
+    void setProbability(int probability)
+    {
+        probability_ = probability;
+    }
 };
 class FigureBraceToken:public OneArgToken{
 public:
@@ -289,25 +289,67 @@ public:
     }
     bool checkType(char c) const override {return c=='}'||c=='{';}
 };
-class OrToken : public TwoArgToken
+class OrToken : public BaseToken
+{
+    std::list<BasePtr> children_;
+    std::list<int> probabilities_;
+public:
+    void proc(StringList &rt) override;
+    size_t preCount() override;
+    bool checkType(char c) const override {return c=='|';}
+    bool checkChildType(char c) const override
+    {
+        return  children_.back()->checkType(c);
+    }
+    virtual void setChild(BasePtr c) override
+    {
+        children_.push_back(c);
+    }
+    virtual void resetChild(BasePtr other) override
+    {
+        other->setChild(children_.back());
+        children_.back() = other;
+    }
+    void setProbabilities(const std::list<int> &probabilities)
+    {
+        probabilities_ = probabilities;
+        if(probabilities_.size() > children_.size()) probabilities_.resize(children_.size());
+    }
+
+};
+/*!
+ * \brief The TopToken class fake token to unify parsing
+ */
+class TopToken: public OneArgToken
 {
 public:
-    void proc(StringList &rt) override
+    void proc(StringList &) override
     {
-        if(left_ && right_){
-            DepthAcceptor verticalControl(BaseToken::TreeDepth);
-            right_->proc(rt);
-            left_->proc(rt);
-        }
-        else throw DGException("args not set in OrToken");
+        throw DGException("TopToken was not removed");
     }
     size_t preCount() override
     {
-        if (left_ && right_) return right_->preCount()+left_->preCount();
-        else throw DGException("args not set in OrToken");
+        throw DGException("TopToken was not removed");
     }
-    bool checkType(char c) const override {return c=='|';}
-
+    bool checkType(char ) const override
+    {
+        return false;
+    }
+    BasePtr child(){return child_;}
+};
+class TopTokenGuard
+{
+    std::shared_ptr<TopToken> &tt_;
+    BasePtr &top_;
+public:
+    TopTokenGuard(std::shared_ptr<TopToken> &tt, BasePtr &top):tt_(tt),top_(top)
+    {
+        top_= tt_;
+    }
+    ~TopTokenGuard()
+    {
+        top_ = tt_->child();
+    }
 };
 
 #endif // BASETOKEN_H

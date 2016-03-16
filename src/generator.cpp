@@ -1,7 +1,8 @@
 #include "generator.h"
-//#include <time.h>
+#include <time.h>
 Generator::Generator()
 {
+    srand(clock());
     setMainTokenName("grammar");
 }
 
@@ -69,6 +70,33 @@ void Generator::getTokens(const std::string &expr, Parser &parser)
 {
     parser.parse(expr);
     customTokenTrees_ = parser.resultsOfParsing();
+}
+
+void Generator::setOrTokensProbabilities(const std::string &name, size_t tokenNumber, const std::list<int> &probabilities)
+{
+    try
+    {
+        auto &tree = customTokenTrees_.at(name);
+        tree->setProbabilities(tokenNumber,probabilities);
+    }
+    catch(DGException &){throw;}
+    catch(...)
+    {
+        throw DGException("Generator::setOrTokensProbabilities error. Error while setting dictionary. Custom token <"+name+"> not found");
+    }
+}
+void Generator::setSquareBraceProbability(const std::string &name, size_t tokenNumber, int probability)
+{
+    try
+    {
+        auto &tree = customTokenTrees_.at(name);
+        tree->setProbability(tokenNumber,probability);
+    }
+    catch(DGException &){throw;}
+    catch(...)
+    {
+        throw DGException("Generator::setSquareBraceProbability error. Error while setting dictionary. Custom token <"+name+"> not found");
+    }
 }
 
 bool Generator::checkSize(size_t checked,size_t passed)

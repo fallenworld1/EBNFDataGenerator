@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 
-#include "generator.h"
+#include "src/generator.h"
 #include <chrono>
 
 
@@ -33,6 +33,9 @@ int main()
 
         Generator generator;
         generator.getTokens(expr,Parser());
+        generator.setOrTokensProbabilities("character",0,{5,5,40,50});
+        generator.setSquareBraceProbability("not",0,40);
+        generator.setSquareBraceProbability("word",0,20);
         delta = std::chrono::steady_clock::now() - start;
         cout<<"Time spent: "<<delta.count()<<endl;
         //generator.setAddingPolicy("word",std::make_shared<NearAveragePolicy>(6.0,2.0));

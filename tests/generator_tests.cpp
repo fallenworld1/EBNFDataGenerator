@@ -21,10 +21,10 @@ TEST(GeneratorTests, SimpleGeneratingTest)
     gen.getTokens(str,Parser());
     gen.generate("or");
     auto res = gen.getResults();
-    ASSERT_GE(res.size(), 4);
-    ASSERT_EQ(res[0],"");
-    ASSERT_EQ(res[2],"aaa");
-    ASSERT_EQ(res[4],"a");
+    ASSERT_GE(res.size(), 5);
+    ASSERT_EQ(res[1],"");
+    ASSERT_EQ(res[3],"aaa");
+    ASSERT_EQ(res[2],"a");
 
     gen.generate("figure_brace");
     res = gen.getResults();
@@ -46,25 +46,41 @@ TEST(GeneratorTests, SimpleGeneratingTest)
     ASSERT_THROW(gen.generate(),routines::DGException);
     ASSERT_THROW(gen.generate("NotExistedName"),routines::DGException);
 
-	gen.setAddingPolicy(std::make_shared<MinMaxPolicy>(1, 3));
-	gen.generate("or");
-	res = gen.getResults();
-	for (auto &r : res)
-	{
-		ASSERT_GE(r.size(), 1);
-		ASSERT_LE(r.size(), 3);
-	}
-	StringList dict{ "1", "2" };
+    gen.setAddingPolicy(std::make_shared<MinMaxPolicy>(1, 3));
+    gen.generate("or");
+    res = gen.getResults();
+    for (auto &r : res)
+    {
+        ASSERT_GE(r.size(), 1);
+        ASSERT_LE(r.size(), 3);
+    }
+    StringList dict{ "1", "2" };
 
-	gen.setDictionary("quotes",dict);
-	gen.generate("or");
-	res = gen.getResults();
+    gen.setDictionary("quotes",dict);
+    gen.generate("or");
+    res = gen.getResults();
     for (auto &d : dict)
     {
-		ASSERT_NE(std::find(std::begin(res), std::end(res), d), std::end(res));
-	}
+        ASSERT_NE(std::find(std::begin(res), std::end(res), d), std::end(res));
+    }
 
     str = "a=b;b=a;";
     gen.getTokens(str,Parser());
     ASSERT_NO_FATAL_FAILURE(gen.generate("a"));
+}
+TEST(GeneratorTests,ThrowingTest)
+{
+    using namespace std;
+    Generator g;
+    g.getTokens("a=[\"1\"]|\"2\";",Parser());
+    try
+    {
+        g.setAddingPolicy("1",nullptr);
+    }
+    catch(exception &e)
+    {
+        ASSERT_EQ(string(e.what()),"Generator::setAddingPolicy error. Error while setting dictionary. Custom token <1> not found")<<"Exception string test";
+
+    }
+
 }

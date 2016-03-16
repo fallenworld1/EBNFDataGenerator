@@ -1,12 +1,13 @@
 # EBNFDataGenerator
 Simple tool for generate random texts by EBNF rule. 
-To make project you can use QtCreator or any other IDE. 
-Or just run qmake in src dir.
-Or use cmake.(need to specify THRPARTY environment variable whith path to libraries)
 
+To build use cmake or QtCreator:
 
-Default input read from file named "input" and output results stored to "output" in local. Generator trying to generate 150strings of text for 500 attempt(see args of function Parser::generate). If use big rules generating will be slow.
+first specify env variable thrdparty with path to gtest library like
+thrdparty/lib/gtest_64.lib...
+thrdparty/include/gtest/...
 
-Tests have dependency to GoogleTests.
+src - build library
+tests - build tests
 
-!!!Project isn't full ready now and can have bugs.!!!
+example of use in main.cpp

@@ -31,10 +31,11 @@ void Tree::buildTree(const string &expr, ConstStrIt &begin)
 
     stack<BasePtr> tokenStack;
     auto end = std::end(expr);
-
-    BasePtr current = std::make_shared<RoundBraceToken>();
+    auto first =  std::make_shared<RoundBraceToken>();
+    BasePtr current = first;
     BasePtr lastToken;
-    top_ = current;
+    //TopTokenGuard tg(current,top_);
+    //top_ = current;
     try
     {
         while(1)
@@ -59,23 +60,31 @@ void Tree::buildTree(const string &expr, ConstStrIt &begin)
             }
             case CONCAT:
                 lastToken = std::make_shared<ConcatToken>();
-                current->resetChild(lastToken);
+                if(current->checkType(',') || current->checkType('|')) lastToken->setChild(current);
+                else current->resetChild(lastToken);
                 current = lastToken;
                 canChange_=true;
                 break;
             case OR:
-                lastToken = std::make_shared<OrToken>();
-                current->resetChild(lastToken);
-                current = lastToken;
+                if(!current->checkType('|'))
+                {
+                    orTokens_.push_back(std::make_shared<OrToken>());
+                    lastToken = orTokens_.back();
+                    if(current->checkType(','))lastToken->setChild(current);
+                    else current->resetChild(lastToken);
+                    current = lastToken;
+                }
                 break;
             case OPEN_ROUND_BRACE:
                 lastToken = std::make_shared<RoundBraceToken>();
                 tokenStack.push(current);
                 current->setChild(lastToken);
                 current = lastToken;
+
                 break;
             case OPEN_SQUARE_BRACE:
-                lastToken = std::make_shared<SquareBraceToken>();
+                SBTokens_.push_back(std::make_shared<SquareBraceToken>());
+                lastToken = SBTokens_.back();
                 tokenStack.push(current);
                 current->setChild(lastToken);
                 current = lastToken;
@@ -96,6 +105,7 @@ void Tree::buildTree(const string &expr, ConstStrIt &begin)
             case TOKENS_DELIMETR:
                 ++begin;
                 treeValid_ = true;
+                top_ = current;
                 return;
                 break;
             case CRBRACE:case CSBRACE:case CFBRACE:
@@ -182,6 +192,7 @@ void Tree::generateAndGet(StringList &rt)
 
 void Tree::refresh()
 {
+    result_.clear();
     customTokens_.clear();
     treeValid_ = false;
     canChange_ = false;
@@ -189,6 +200,18 @@ void Tree::refresh()
     dictionary_.clear();
     addingPolicy_ = std::make_shared<DefaultPolicy>();
 
+}
+
+void Tree::setProbabilities(size_t tokenNumber, const std::list<int> &probabilities)
+{
+    if(orTokens_.size()<=tokenNumber) throw DGException("Tree::setProbabilities error. Wrong OrTokenNumber");
+    orTokens_.at(tokenNumber)->setProbabilities(probabilities);
+}
+
+void Tree::setProbability(size_t tokenNumber, int probability)
+{
+    if(SBTokens_.size()<=tokenNumber) throw DGException("Tree::setProbability error. Wrong SquareBraceTokenNumber");
+    SBTokens_.at(tokenNumber)->setProbability(probability);
 }
 
 

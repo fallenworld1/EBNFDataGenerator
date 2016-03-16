@@ -76,7 +76,7 @@ TEST(TreeTests, GeneratingTest)
         ASSERT_TRUE((r.empty()
                      || std::find(std::begin(r),std::end(r),'1')!=std::end(r)
                 || std::find(std::begin(r),std::end(r),'2')!=std::end(r)));
-        ASSERT_LE(r.size(),4);
+        ASSERT_GE(r.size(),4);
     }
     StringList dictionary;
     dictionary.emplace_back("3");
@@ -98,6 +98,12 @@ TEST(TreeTests, GeneratingTest)
     for(auto &r:results){
         ASSERT_LE(r.size(),2);
     }
+    expr ="a=\"1\",\"2\"|\"3\";";
+    tree.buildTree(expr,std::begin(expr));
+    tree.generate(true);
+    results = tree.getResults();
+    ASSERT_EQ(results[0],"12");
+    ASSERT_EQ(results[1],"3");
 }
 TEST(TreeTests, CustomTokenTest)
 {

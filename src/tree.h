@@ -32,16 +32,20 @@ class Tree
         UNDERSCORE          = '_'
     };
 
-    using CTContainer = std::vector<std::shared_ptr<CustomToken> >;///Custom Tokens Container
+    using CTContainer =  std::vector<std::shared_ptr<CustomToken> >;///Custom Tokens Container
+    using OTContainer =  std::vector<std::shared_ptr<OrToken> >;///Or     Tokens Container
+    using SBTContainer = std::vector<std::shared_ptr<SquareBraceToken> >;///[]     Tokens Container
 
-    BasePtr     top_;           /// top of this tree
-    StringList  result_;        /// generated results
-    CTContainer customTokens_;  /// map of all custom tokens linked name to ptr
-    std::string name_;          /// current tree name, for linking
-    bool        treeValid_;     /// true if this tree valid(can reproduce results)
-    bool        canChange_ ;    /// indicates this tree had randomisation in generating
-    StringList  dictionary_;    /// user defined values this tree can generate
-    PolicyPtr   addingPolicy_;  /// what elements add to the results
+    BasePtr      top_;           /// top of this tree
+    StringList   result_;        /// generated results
+    CTContainer  customTokens_;  /// vector of all custom tokens in this tree
+    OTContainer  orTokens_;      /// vector of all Or tokens in this tree
+    SBTContainer SBTokens_;      /// vector of all [] tokens in this tree
+    std::string  name_;          /// current tree name, for linking
+    bool         treeValid_;     /// true if this tree valid(can reproduce results)
+    bool         canChange_ ;    /// indicates this tree had randomisation in generating
+    StringList   dictionary_;    /// user defined values this tree can generate
+    PolicyPtr    addingPolicy_;  /// what elements add to the results
     /*!
      * \brief adjustResults \a rt
      * \param [in/out] rt adjustable results
@@ -140,6 +144,22 @@ public:
      * \brief refresh this tree
      */
     void refresh();
+    /*!
+     * \brief set Probabilities of elements adding in OrToken
+     * \param [in] tokenNumber number of element in orTokens_
+     * \param [in] probabilities probabilities to set up
+     *
+     * sets up \a probabilities in orTokens_[tokenNumber]
+     */
+    void setProbabilities(size_t tokenNumber,const std::list<int>& probabilities);
+    /*!
+     * \brief setProbability of elements adding in SquareBraceToken
+     * \param [in] tokenNumber number of element in orTokens_
+     * \param [in] probabiliy probability to set up
+     *
+     * sets up \a probability in SBTokens_[tokenNumber]
+     */
+    void setProbability(size_t tokenNumber,int probability);
 };
 
 

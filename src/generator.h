@@ -102,6 +102,8 @@ public:
       * install new token trees that \a parser produce from \a expr string
       */
      void getTokens(const std::string &expr,Parser &parser);
+     void setOrTokensProbabilities(const std::string &name, size_t tokenNumber,const std::list<int>& probabilities);
+     void setSquareBraceProbability(const std::string &name,size_t tokenNumber,int probability);
 
 };
 

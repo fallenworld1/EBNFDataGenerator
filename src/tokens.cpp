@@ -39,7 +39,7 @@ void ConcatToken::proc(StringList &rt)
     {
         auto &l = wordsLength[lrIt->size()+rrIt->size()];
         ++l;
-        if(l<=verticalControl/BaseToken::MaxConcatenationDepth+1) rt.push_back(move(*lrIt+*rrIt));
+        if(l<=verticalControl) rt.push_back(move(*lrIt+*rrIt));
         if(++lrIt == lrEnd) lrIt = lrBegin;
         if(++rrIt == rrEnd) rrIt = rrBegin;
 
@@ -128,3 +128,44 @@ void BaseToken::decreaseRanges()
 
 
 
+
+void OrToken::proc(StringList &rt)
+{
+    if (children_.size()>=2)
+    {
+        DepthAcceptor verticalControl(BaseToken::TreeDepth);
+        auto begin = std::begin(children_);
+        std::for_each(std::begin(probabilities_),std::end(probabilities_), //probabilities_.size() <= children_.size()
+                      [&](int prob)
+                                  {
+                                    if(rand()%100 < prob) (*begin)->proc(rt);
+                                    ++begin;
+                                  }
+        );
+        std::for_each(begin,std::end(children_),[&](BasePtr &child){child->proc(rt);});
+
+    }
+    else throw DGException("args not set in OrToken");
+}
+
+size_t OrToken::preCount()
+{
+    if (children_.size()>=2)
+    {
+        size_t result = 0;
+        for(auto &c:children_) result+=c->preCount();
+        return result;
+    }
+    else throw DGException("args not set in OrToken");
+}
+
+void SquareBraceToken::proc(StringList &rt)
+{
+    if(child_)
+    {
+        DepthAcceptor verticalControl(BaseToken::TreeDepth);
+        if(rand()%100 < probability_) child_->proc(rt);
+        if(rand()%100 < 100-probability_) rt.push_back("");
+    }
+    else throw DGException("Arg child_ not set in SquareBraceToken");
+}
