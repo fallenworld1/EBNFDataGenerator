@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 2.8.1)
 set(TARGET_NAME DataGeneratorTests)
 set(POJECT_NAME DataGeneratorTests)
 
+
 #project name
 project (${POJECT_NAME})
 
@@ -38,3 +39,5 @@ add_executable       (${TARGET_NAME} ${SOURCES})
 target_link_libraries(${TARGET_NAME} gtest)
 target_link_libraries(${TARGET_NAME} gtest_main)
 target_link_libraries(${TARGET_NAME} DataGenerator)
+
+set(CMAKE_CXX_FLAGS -std=c++11)

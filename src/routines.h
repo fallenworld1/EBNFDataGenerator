@@ -64,7 +64,7 @@ public:
          str[1] = lit;
          what_.append(str);
          what_.append(" at ");
-         sprintf_s(str,9,"%d",(int)offset);
+         sprintf(str,"%d",(int)offset);
          what_.append(str);
      }
 };

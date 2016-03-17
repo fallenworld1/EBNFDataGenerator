@@ -17,8 +17,9 @@ TEST(GeneratorTests, CreatingEmptyTest)
 TEST(GeneratorTests, SimpleGeneratingTest)
 {
     Generator gen;
+    Parser  par;
     std::string str = "quotes = \"a\"; figure_brace = {quotes}; round_brace = (quotes); concat = quotes,figure_brace;or = quotes|figure_brace;";
-    gen.getTokens(str,Parser());
+    gen.getTokens(str,par);
     gen.generate("or");
     auto res = gen.getResults();
     ASSERT_GE(res.size(), 5);
@@ -65,14 +66,15 @@ TEST(GeneratorTests, SimpleGeneratingTest)
     }
 
     str = "a=b;b=a;";
-    gen.getTokens(str,Parser());
+    gen.getTokens(str,par);
     ASSERT_NO_FATAL_FAILURE(gen.generate("a"));
 }
 TEST(GeneratorTests,ThrowingTest)
 {
     using namespace std;
     Generator g;
-    g.getTokens("a=[\"1\"]|\"2\";",Parser());
+    Parser p;
+    g.getTokens("a=[\"1\"]|\"2\";",p);
     try
     {
         g.setAddingPolicy("1",nullptr);

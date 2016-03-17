@@ -20,9 +20,10 @@ TEST(TreeTests, SimpleSuccessParsingTest)
 {
     Tree tree;
     std::string expr;
-    ASSERT_THROW(tree.buildTree(expr,expr.begin()),routines::DGException);
+    auto it = expr.cbegin();
+    ASSERT_THROW(tree.buildTree(expr,it),routines::DGException);
     expr = "  #comment#  main    =    \"1\"\t\t;";
-    auto it = expr.begin();
+    it = expr.cbegin();
     tree.buildTree(expr,it);
     ASSERT_FALSE(tree.canChange());
     ASSERT_EQ(it,expr.end());
@@ -45,8 +46,8 @@ TEST(TreeTests, SimpleFailParsingTest)
     {
         try
         {
-
-            tree.buildTree(error,begin(error));
+            auto it = error.cbegin();
+            tree.buildTree(error,it);
         }
         catch(exception &e)
         {
@@ -68,7 +69,8 @@ TEST(TreeTests, GeneratingTest)
 {
     Tree tree;
     std::string expr = "a={[\"1\"]|[\"2\"]};";
-    tree.buildTree(expr,std::begin(expr));
+    auto it = expr.cbegin();
+    tree.buildTree(expr,it);
     ASSERT_TRUE(tree.isValid());
     tree.generate(true);
     auto results = tree.getResults();
@@ -99,7 +101,8 @@ TEST(TreeTests, GeneratingTest)
         ASSERT_LE(r.size(),2);
     }
     expr ="a=\"1\",\"2\"|\"3\";";
-    tree.buildTree(expr,std::begin(expr));
+    it = expr.cbegin();
+    tree.buildTree(expr,it);
     tree.generate(true);
     results = tree.getResults();
     ASSERT_EQ(results[0],"12");
@@ -110,7 +113,8 @@ TEST(TreeTests, CustomTokenTest)
 	TreePtr tree= std::make_shared<Tree>();
 	StringList result,expect;
 	std::string expr = "a=\"1\"|\"2\";";
-	tree->buildTree(expr, std::begin(expr));
+    auto it = expr.cbegin();
+    tree->buildTree(expr,it);
 	CustomToken ct("main",nullptr);
 	ASSERT_THROW(ct.proc(result), DGException) << "Childs not set";
 	ASSERT_THROW(ct.preCount(), DGException) << "Childs not set";
