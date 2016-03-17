@@ -74,12 +74,14 @@ TEST(TreeTests, GeneratingTest)
     ASSERT_TRUE(tree.isValid());
     tree.generate(true);
     auto results = tree.getResults();
+    ASSERT_GE(results.size(),4);
     for(auto &r:results){
         ASSERT_TRUE((r.empty()
                      || std::find(std::begin(r),std::end(r),'1')!=std::end(r)
                 || std::find(std::begin(r),std::end(r),'2')!=std::end(r)));
-        ASSERT_GE(r.size(),4);
+
     }
+
     StringList dictionary;
     dictionary.emplace_back("3");
     dictionary.emplace_back("4");

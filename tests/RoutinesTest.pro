@@ -23,16 +23,10 @@ SOURCES += \
 
 INCLUDEPATH+= ../src
 
-INCLUDEPATH += $$(THRDPARTY)/include
-
-DEPENDPATH += $$(THRDPARTY)/include
-
-unix:!macx|win32: LIBS += -L$$(THRDPARTY)/lib/ -lgtest_64
-unix:!macx|win32: LIBS += -L$$(THRDPARTY)/lib/ -lgtest_main_64
-#libraries must be compilled with MTd flag
-#to use Qt Creator Google Test plugin uncheck Projects->Run->Run in terminal
-
-#win32:!win32-g++: PRE_TARGETDEPS += $$(THRDPARTY)/lib/gtest.lib
-#else:unix:!macx|win32-g++: PRE_TARGETDEPS += $$(THRDPARTY)/lib/libgtest.a
 
 
+
+
+
+unix|win32: LIBS += -lgtest
+unix|win32: LIBS += -lgtest_main
