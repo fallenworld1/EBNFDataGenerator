@@ -174,14 +174,11 @@ void readLiteralName(ConstStrIt &begin, const ConstStrIt &end, std::string &out)
 
 class Generator;
 /*!
- * \brief loads dictionary from file
- * \param [in] tokenName name of Tree to set Dictionary
- * \param [in] fileName name of file to load strings
- * \param [in] g generator where \a tokenName is
- *
- * loads dictionary in token(in generator \a g) \a tokenName
+ * \brief loads Dictionary From File
+ * \param [in] fileName name of file to load from
+ * \param [out] dictionary list of words
  */
-void loadDictionaryFromFile(const std::string &tokenName,const std::string & fileName,Generator &g);
+void loadDictionaryFromFile(const std::string & fileName,StringList &dictionary);
 /*!
  * \brief prints \a count elements of \a rt to \a os
  * \param [in] rt list to copy from

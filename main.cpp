@@ -1,90 +1,159 @@
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <string>
+#include <iterator>
 
 #include "src/generator.h"
 #include <chrono>
 
 
 
-/*!
- * \brief This is an example of using EBNF Generator
- *
- * include generator.h and linc DataGenerator lib
- */
 
+void readEBNF(const std::string &filename, std::string &grammar)
+{
+    using namespace std;
+    ifstream ifs(filename);
+
+    string str;
+    grammar.clear();
+
+
+    while(ifs>>str)
+    {
+        grammar.append(str);
+        grammar.append(" ");
+    }
+}
+void readAndSetSettings(const std::string &filename, Generator &g)
+{
+    using namespace std;
+    ifstream ifs(filename);
+    char data[1024];
+    while(ifs.getline(data,1024))
+    {
+        if(data[0]==0)continue;
+        string str(data);
+        istringstream command(str);
+        auto it = istream_iterator<string>(command);
+        auto end = istream_iterator<string>();
+
+        if(*it=="probabilities")
+        {
+
+            if(++it==end) throw runtime_error("Wrong command: "+str);
+            string tokenName = *it;
+            if(++it==end) throw runtime_error("Wrong command: "+str);
+            size_t operatorNum = atoi(it->c_str());
+            list<int> probabilities;
+            while(++it!=end) probabilities.push_back(atoi(it->c_str()));
+
+            g.setOrTokensProbabilities(tokenName,operatorNum,probabilities);
+
+        }
+        else if(*it=="probability")
+        {
+            if(++it==end) throw runtime_error("Wrong command: "+str);
+            string tokenName = *it;
+            if(++it==end) throw runtime_error("Wrong command: "+str);
+            size_t operatorNum = atoi(it->c_str());
+            int probability;
+            if(++it==end) throw runtime_error("Wrong command: "+str);
+            probability = atoi(it->c_str());
+            g.setSquareBraceProbability(tokenName,operatorNum,probability);
+
+        }
+        else if(*it=="main")
+        {
+            if(++it==end) throw runtime_error("Wrong command: "+str);
+            g.setMainTokenName(*it);
+        }
+        else if(*it=="dictionary")
+        {
+            if(++it==end) throw runtime_error("Wrong command: "+str);
+            string tokenName = *it;
+            if(++it==end) throw runtime_error("Wrong command: "+str);
+            StringList dictionary;
+            if(*it=="load")
+            {
+                if(++it==end) throw runtime_error("Wrong command: "+str);
+                routines::loadDictionaryFromFile(*it,dictionary);
+            }
+            else if(*it=="set")
+            {
+                while(++it!=end) dictionary.push_back(*it);
+            }
+            else throw runtime_error("Wrong command: "+str);
+            if(tokenName == "all") g.setDictionary(tokenName,dictionary);
+            else g.setDictionary(dictionary);
+
+        }
+        else if(*it=="policy")
+        {
+            if(++it==end) throw runtime_error("Wrong command: "+str);
+            string tokenName = *it;
+            if(++it==end) throw runtime_error("Wrong command: "+str);
+            PolicyPtr policy;
+            if(*it=="DefaultPolicy")
+            {
+                policy = std::make_shared<DefaultPolicy>();
+            }
+            else if(*it=="MinMaxDPolicy")
+            {
+                policy = std::make_shared<MinMaxDPolicy>();
+            }
+            else if(*it=="MinMaxPolicy")
+            {
+                if(++it==end) throw runtime_error("Wrong command: "+str);
+                size_t min = atoi(it->c_str());
+                if(++it==end) throw runtime_error("Wrong command: "+str);
+                size_t max = atoi(it->c_str());
+                policy = std::make_shared<MinMaxPolicy>(min,max);
+            }
+            else if(*it=="NearAveragePolicy")
+            {
+                if(++it==end) throw runtime_error("Wrong command: "+str);
+                size_t min = atof(it->c_str());
+                if(++it==end) throw runtime_error("Wrong command: "+str);
+                size_t max = atof(it->c_str());
+                policy = std::make_shared<MinMaxPolicy>(min,max);
+            }
+            else throw runtime_error("Wrong command: "+str);
+            if(tokenName == "all") g.setAddingPolicy(tokenName,policy);
+            else g.setAddingPolicy(policy);
+        }
+        else throw runtime_error("Wrong command: "+str);
+
+    }
+}
+void storeResults(const std::string &filename, const StringList &results)
+{
+    std::ofstream ofs(filename);
+    routines::showResults(results,ofs,results.size());
+}
 
 int main()
 {
     using namespace std;
 
-    setlocale(LC_ALL,"ru-RU.UTF-8");
-    ifstream ifs("input");
-    ofstream ofs("output");
-    string expr,str;
-    cout<<"Reading EBNF..."<<endl;
-    //std::chrono::time_point<std::chrono::system_clock> start;
-    std::chrono::duration<double> delta;
-    auto start = std::chrono::steady_clock::now();
-    while(ifs>>str) //read all data from input file to expr
-    {
-        expr.append(str);
-        expr.append(" ");
-    }
-
     try
     {
-
-        Generator generator; //main class to use
+        Generator generator;
         Parser parser;
-        generator.getTokens(expr,parser);//parse expr for tokens with parser and store it to generator
-        generator.setOrTokensProbabilities("character",0,{5,5,40,50});//for token character type like ...a|b|c|d...  - a and b have 5%chance to be added c - 40% and d - 50%
-        generator.setSquareBraceProbability("not",0,40);//for token not type like ...[x]... x has 40%chance to be added
-        generator.setSquareBraceProbability("word",0,20);//for token word type like ...[x]...x has 20%chance to be added
-        delta = std::chrono::steady_clock::now() - start;
-        cout<<"Time spent: "<<delta.count()<<endl;
-        //generator.setAddingPolicy("word",std::make_shared<NearAveragePolicy>(6.0,2.0));
-        //generator.setAddingPolicy("rule",std::make_shared<MaxPolicy>(50));
-        //generator.setMainTokenName("grammar");
+        std::string grammar;
 
-        // loadDictionaryFromFile("word","words",generator);
-        //generator.setAddingPolicy("word",std::make_shared<MinMaxPolicy>());
+        readEBNF("input",grammar);
+        generator.getTokens(grammar,parser);
+        readAndSetSettings("settings",generator);
+        generator.generate();
+        storeResults("output",generator.getResults());
 
-        std::string command;
-        while(1)
-        {
-            try
-            {
-                cout<<"Waiting for input...(to exit enter \"q\")...\n";
-                cin >>command;
-                if(command == "q") break;
-
-
-                cout<<"Generating data for token "<<command<<"... \n";
-                start = std::chrono::steady_clock::now();
-                generator.generate(command);//generates results for token named $command
-                StringList results = generator.getResults();//gets results as vector<string>
-                routines::showCorrespondingResults(results,ofs,results.size());//store result to ofs(output file)
-                delta = std::chrono::steady_clock::now() - start;
-                cout<<"Time spent: "<<delta.count()<<endl;
-            }
-            catch(exception &e)
-            {
-                cerr<<"Error occured: "<<endl;
-                cerr<<e.what()<<endl;
-            }
-        }
     }
     catch(exception &e)
     {
         cerr<<"Error occured: "<<endl;
         cerr<<e.what()<<endl;
     }
-    //system("pause");
     return 0;
-
-
-
-
 }
 

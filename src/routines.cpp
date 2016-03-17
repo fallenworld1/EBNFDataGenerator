@@ -51,19 +51,17 @@ void removeSpaces(std::string &str)
     str.erase(remove_if(begin(str),end(str),[](char c){return isspace(c);}),end(str));
 }
 
-void loadDictionaryFromFile(const std::string &tokenName, const std::string &fileName, ::Generator &g)
+void loadDictionaryFromFile(const std::string &fileName, StringList &dictionary)
 {
     using namespace std;
 
     ifstream ifs(fileName);
-    StringList dictionary;
     string word;
     while(!ifs.eof())
     {
         ifs>>word;
         dictionary.emplace_back(move(word));
     }
-    g.setDictionary(tokenName,dictionary);
 }
 
 void showResults(const StringList &rt, std::ostream &os, size_t count)

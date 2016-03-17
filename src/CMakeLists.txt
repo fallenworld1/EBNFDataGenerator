@@ -1,6 +1,6 @@
 #minimum cmake version to build
 cmake_minimum_required (VERSION 2.8.1)
-set(CMAKE_CXX_FLAGS -std=c++11)
+
 set(TARGET_NAME DataGenerator)
 set(POJECT_NAME DataGenerator)
 
@@ -22,4 +22,4 @@ file (GLOB SOURCES ${SOURCES})
 
 add_library(${TARGET_NAME} STATIC ${SOURCES})
 
-set(CMAKE_CXX_FLAGS -std=c++11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
