@@ -26,4 +26,4 @@ dictionary <string:tokenName> "load" <string:filename>
 #loads dictionary from <filename> to token name <tokenName> (tokenName = "all" sets dictionary to all tokens)
 policy     <string:tokenName>  <string:policyName>
 #set policy <policyName> to token name <tokenName> (tokenName = "all" sets policy to all tokens)
-#policies:DefaultPolicy,MinMaxDPolicy,MinMaxPolicy,NearAveragePolicy
+#policies:DefaultPolicy,MinMaxDPolicy,MinMaxPolicy<number:min,number:max>,NearAveragePolicy<double:average,double:range[r 0:average*range]>,DictionarySizePolicy<number:multiplier>

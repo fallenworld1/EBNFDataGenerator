@@ -31,19 +31,26 @@ void ConcatToken::proc(StringList &rt)
         return;
     }
     map<size_t,size_t> wordsLength;
-    size_t iterCount = max(rr.size(),lr.size());
+   // size_t iterCount = max(rr.size(),lr.size());
 
 
-    auto lrIt = begin(lr),lrBegin = begin(lr),lrEnd = end(lr),rrIt = begin(rr),rrBegin = begin(rr),rrEnd = end(rr);
+    /*auto lrIt = begin(lr),lrBegin = begin(lr),lrEnd = end(lr),rrIt = begin(rr),rrBegin = begin(rr),rrEnd = end(rr);
     while(iterCount-->0)
     {
         auto &l = wordsLength[lrIt->size()+rrIt->size()];
         ++l;
-        if(l<=verticalControl) rt.push_back(move(*lrIt+*rrIt));
+        if(l<=verticalControl+MaxConcatenationDepth) rt.push_back(move(*lrIt+*rrIt));
         if(++lrIt == lrEnd) lrIt = lrBegin;
         if(++rrIt == rrEnd) rrIt = rrBegin;
 
-    }
+    }*/
+    for(auto &le:lr)
+        for(auto &re:rr)
+        {
+            auto &l = wordsLength[le.size()+re.size()];
+            ++l;
+            if(l<=verticalControl+MaxConcatenationDepth) rt.push_back(move(le+re));
+        }
 }
 
 
@@ -110,19 +117,21 @@ size_t CustomToken::preCount()
 
 void BaseToken::increaseRanges()
 {
-    MaxConcatenationDepth+=2;
+    ++MaxConcatenationDepth;
     ++FigureBraceDepth;
     ++FigureBraceRepeatCount;
+    if(FigureBraceStep>1)--FigureBraceStep;
     //++MaxRecursionDepth;
 }
 
 
 void BaseToken::decreaseRanges()
 {
-    if(MaxConcatenationDepth>DefaultMaxConcatenationDepth+2)MaxConcatenationDepth-=2;
+    if(MaxConcatenationDepth>DefaultMaxConcatenationDepth+2)--MaxConcatenationDepth;
     if(FigureBraceRepeatCount>DefaultFigureBraceRepeatCount)--FigureBraceRepeatCount;
     //if(MaxRecursionDepth>DefaultMaxRecursionDepth)--MaxRecursionDepth;
     if(FigureBraceDepth>DefaultFigureBraceDepth)--FigureBraceDepth;
+    ++FigureBraceStep;
 }
 
 
@@ -165,7 +174,7 @@ void SquareBraceToken::proc(StringList &rt)
     {
         DepthAcceptor verticalControl(BaseToken::TreeDepth);
         if(rand()%100 < probability_) child_->proc(rt);
-        if(rand()%100 < 100-probability_) rt.push_back("");
+        rt.push_back("");
     }
     else throw DGException("Arg child_ not set in SquareBraceToken");
 }

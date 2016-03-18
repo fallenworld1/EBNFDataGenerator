@@ -60,9 +60,10 @@ TEST(GeneratorTests, SimpleGeneratingTest)
     gen.setDictionary("quotes",dict);
     gen.generate("or");
     res = gen.getResults();
+    auto end = std::end(res);
     for (auto &d : dict)
     {
-        ASSERT_NE(std::find(std::begin(res), std::end(res), d), std::end(res));
+        ASSERT_FALSE(std::find(std::begin(res), end, d) ==  end);
     }
 
     str = "a=b;b=a;";

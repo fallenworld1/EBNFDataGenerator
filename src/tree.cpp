@@ -63,7 +63,7 @@ void Tree::buildTree(const string &expr, ConstStrIt &begin)
                 if(current->checkType(',') || current->checkType('|')) lastToken->setChild(current);
                 else current->resetChild(lastToken);
                 current = lastToken;
-                canChange_=true;
+                //canChange_=true;
                 break;
             case OR:
                 if(!current->checkType('|'))
@@ -94,13 +94,13 @@ void Tree::buildTree(const string &expr, ConstStrIt &begin)
                 tokenStack.push(current);
                 current->setChild(lastToken);
                 current = lastToken;
-                canChange_=true;
+                //canChange_=true;
                 break;
             case NAME_BODY_DELIMETR:
                 if(!name_.empty()) throw DGException("Tree::buildTree error. Unexpected occurence of: ",*begin,begin-std::begin(expr));
                 if(customTokens_.size()>1) throw DGException("Tree::buildTree error. Wrong syntax near "+customTokens_.back()->name());
                 name_ = customTokens_.back()->name();
-                canChange_=false;
+                //canChange_=false;
                 break;
             case TOKENS_DELIMETR:
                 ++begin;
@@ -136,7 +136,7 @@ void Tree::buildTree(const string &expr, ConstStrIt &begin)
                     current->setChild(ct);
                     customTokens_.push_back(ct);
                     begin=it-1;
-                    canChange_=true;//TODO add smart changing flag, checks for changing ability of all custom tokens after full parsing
+                    //canChange_=true;//TODO add smart changing flag, checks for changing ability of all custom tokens after full parsing
                 }
                 else throw DGException("Tree::buildTree error. Wrong literal: ",*begin,begin-std::begin(expr));
             }
@@ -159,32 +159,36 @@ void Tree::buildTree(const string &expr, ConstStrIt &begin)
 void Tree::generate(bool reGenerate)
 {
     if(!treeValid_) throw DGException("Tree::generate error. Tree " + name_ + " are not valid.");
-    if(canChange_ || result_.empty())
-    {
+    //if(/*canChange_ ||*/ result_.empty())
+   // {
         if(reGenerate)
         {
             result_.clear();
-            if(top_) top_->proc(result_);
+            if(top_)
+            {
+                //result_(top_->preCount());
+                top_->proc(result_);
+            }
             else throw DGException("Tree::generate error. Tree " + name_ + " pointer to top is NULL.");
             adjustResults(result_);
         }
-    }
+   // }
 }
 void Tree::generateAndGet(StringList &rt)
 {
 
     if (!treeValid_) throw DGException("Tree::generateAndGet error. Tree " + name_ + " not valid");
-    if (canChange_)
-    {
+    //if (canChange_)
+   // {
         if (top_) top_->proc(result_);
         else throw DGException("Tree::generateAndGet error. Tree " + name_ + " had empty top");
         adjustResults(rt);
-    }
-    else
-    {
-        if (result_.empty()) generate(true);
-        rt = result_;
-    }
+    //}
+    //else
+   // {
+    //    if (result_.empty()) generate(true);
+   //     rt = result_;
+    //}
 
 
 
@@ -195,7 +199,7 @@ void Tree::refresh()
     result_.clear();
     customTokens_.clear();
     treeValid_ = false;
-    canChange_ = false;
+    //canChange_ = false;
     name_.clear();
     dictionary_.clear();
     addingPolicy_ = std::make_shared<DefaultPolicy>();

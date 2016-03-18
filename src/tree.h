@@ -32,9 +32,9 @@ class Tree
         UNDERSCORE          = '_'
     };
 
-    using CTContainer =  std::vector<std::shared_ptr<CustomToken> >;///Custom Tokens Container
-    using OTContainer =  std::vector<std::shared_ptr<OrToken> >;///Or     Tokens Container
-    using SBTContainer = std::vector<std::shared_ptr<SquareBraceToken> >;///[]     Tokens Container
+    using CTContainer =  std::deque<std::shared_ptr<CustomToken> >;///Custom Tokens Container
+    using OTContainer =  std::deque<std::shared_ptr<OrToken> >;///Or     Tokens Container
+    using SBTContainer = std::deque<std::shared_ptr<SquareBraceToken> >;///[]     Tokens Container
 
     BasePtr      top_;           /// top of this tree
     StringList   result_;        /// generated results
@@ -43,7 +43,7 @@ class Tree
     SBTContainer SBTokens_;      /// vector of all [] tokens in this tree
     std::string  name_;          /// current tree name, for linking
     bool         treeValid_;     /// true if this tree valid(can reproduce results)
-    bool         canChange_ ;    /// indicates this tree had randomisation in generating
+    //bool         canChange_ ;    /// indicates this tree had randomisation in generating
     StringList   dictionary_;    /// user defined values this tree can generate
     PolicyPtr    addingPolicy_;  /// what elements add to the results
     /*!
@@ -134,7 +134,7 @@ public:
      * \brief canChange
      * \return copy canChange_ flag
      */
-    bool canChange()                                const {  return canChange_;   }
+    //bool canChange()                                const {  return canChange_;   }
     /*!
      * \brief isValid getter func to Tree::treeValid_
      * \return Tree::treeValid_ true - if this tree can generate results

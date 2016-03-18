@@ -2,7 +2,7 @@
 #define DEFINES
 #include <memory>
 #include <map>
-#include <vector>
+#include <deque>
 
 
 using strIt      = std::string::iterator;
@@ -17,7 +17,7 @@ using BasePtr = std::shared_ptr<BaseToken>;
 using TreePtr = std::shared_ptr<Tree> ;
 
 using TreesContainer = std::map<std::string,TreePtr>;
-using StringList =     std::vector<std::string>;
+using StringList =     std::deque<std::string>;
 using PolicyPtr =      std::shared_ptr<AddingPolicy>;
 
 

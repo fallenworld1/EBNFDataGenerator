@@ -89,15 +89,17 @@ TEST(TreeTests, GeneratingTest)
     ASSERT_TRUE(tree.isValid());
     tree.generate(true);
     results = tree.getResults();
+    auto end = std::end(results);
     for(auto &d:dictionary){
-        ASSERT_NE(std::find(std::begin(results),std::end(results),d),std::end(results));
+        ASSERT_FALSE(std::find(std::begin(results),end,d) == end);
     }
     tree.setPolicy(std::make_shared<MinMaxPolicy>(0,2));
     ASSERT_TRUE(tree.isValid());
     tree.generate(true);
     results = tree.getResults();
+    end = std::end(results);
     for(auto &d:dictionary){
-        ASSERT_NE(std::find(std::begin(results),std::end(results),d),std::end(results));
+        ASSERT_FALSE(std::find(std::begin(results),end,d) == end);
     }
     for(auto &r:results){
         ASSERT_LE(r.size(),2);
@@ -132,3 +134,4 @@ TEST(TreeTests, CustomTokenTest)
 	for (int i = 0; i < result.size(); ++i)
 		ASSERT_EQ(result[i], expect[i]);
 }
+

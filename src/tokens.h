@@ -220,7 +220,7 @@ public:
     void proc(StringList &rt) override ;
     size_t preCount() override
     {
-        if (left_ && right_) return std::max(right_->preCount(), left_->preCount());
+        if (left_ && right_) return right_->preCount() * left_->preCount(); //std::max(right_->preCount(), left_->preCount());
         else throw DGException("args not set in ConcatToken");
     }
     bool checkType(char c) const override {return c==',';}
@@ -284,7 +284,7 @@ public:
     {
         //auto s = child_->preCount();
         //return min(s,FigureBraceDepth)*FigureBraceRepeatCount+s;
-        if (child_) return child_->preCount()*(FigureBraceDepth/FigureBraceStep) + 1;
+        if (child_) return child_->preCount()*(FigureBraceDepth/FigureBraceStep+1) + 1;
         else throw DGException("Arg child_ not set in FigureBraceToken");
     }
     bool checkType(char c) const override {return c=='}'||c=='{';}

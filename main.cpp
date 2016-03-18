@@ -7,7 +7,31 @@
 #include "src/generator.h"
 #include <chrono>
 
+class DictionarySizePolicy:public AddingPolicy
+{
+    size_t addingAmount_ = 0;
+    size_t lastAddedCount_ = 0;
+    size_t percentage_ = 0;
+public:
+     DictionarySizePolicy(size_t percentage):percentage_(percentage){}
 
+     void update(const StringList &dictionary) override
+     {
+         addingAmount_ = dictionary.size()*percentage_/100;
+     }
+     virtual bool check(const std::string &elem)
+     {
+         if(lastAddedCount_<addingAmount_)
+         {
+             ++lastAddedCount_;
+             return true;
+         }
+     }
+     virtual void refresh()
+     {
+       lastAddedCount_ = 0;
+     }
+};
 
 
 void readEBNF(const std::string &filename, std::string &grammar)
@@ -84,8 +108,8 @@ void readAndSetSettings(const std::string &filename, Generator &g)
                 while(++it!=end) dictionary.push_back(*it);
             }
             else throw runtime_error("Wrong command: "+str);
-            if(tokenName == "all") g.setDictionary(tokenName,dictionary);
-            else g.setDictionary(dictionary);
+            if(tokenName == "all") g.setDictionary(dictionary);
+            else g.setDictionary(tokenName, dictionary);
 
         }
         else if(*it=="policy")
@@ -118,21 +142,27 @@ void readAndSetSettings(const std::string &filename, Generator &g)
                 size_t max = atof(it->c_str());
                 policy = std::make_shared<MinMaxPolicy>(min,max);
             }
+            else if(*it=="DictionarySizePolicy")
+            {
+                if(++it==end) throw runtime_error("Wrong command: "+str);
+                policy = std::make_shared<DictionarySizePolicy>(atoi(it->c_str()));
+            }
             else throw runtime_error("Wrong command: "+str);
-            if(tokenName == "all") g.setAddingPolicy(tokenName,policy);
-            else g.setAddingPolicy(policy);
+            if(tokenName == "all") g.setAddingPolicy(policy);
+            else g.setAddingPolicy(tokenName, policy);
         }
         else throw runtime_error("Wrong command: "+str);
 
     }
 }
-void storeResults(const std::string &filename, const StringList &results)
+void storeResults(const std::string &filename, const StringList &results, size_t size=0)
 {
     std::ofstream ofs(filename);
-    routines::showResults(results,ofs,results.size());
+    if(size==0) size = results.size();
+    routines::showResults(results,ofs,size);
 }
 
-int main()
+int main(int argc, char **argv)
 {
     using namespace std;
 
@@ -145,8 +175,15 @@ int main()
         readEBNF("input",grammar);
         generator.getTokens(grammar,parser);
         readAndSetSettings("settings",generator);
-        generator.generate();
-        storeResults("output",generator.getResults());
+        size_t count=0;
+        int attemts=-1;
+        if(argc == 2)
+        {
+            count = static_cast<size_t>(atoi(argv[1]));
+            attemts = 100;
+        }
+        generator.generate(count,attemts);
+        storeResults("output",generator.getResults(),count);
 
     }
     catch(exception &e)

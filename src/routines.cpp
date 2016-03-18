@@ -66,15 +66,23 @@ void loadDictionaryFromFile(const std::string &fileName, StringList &dictionary)
 
 void showResults(const StringList &rt, std::ostream &os, size_t count)
 {
+    using namespace std;
+    os<<"results("<<count<<")\n";
+    auto b = begin(rt),e = end(rt);
+    size_t step = rt.size()/count;
+    if(step==0) ++step;
+    for(;b<e;b+=step)
+    {
+         os<<b->c_str()<<endl;
 
-    os<<"results("<<rt.size()<<")\n";
-    for(auto &s:rt)
+    }
+    /*for(auto &s:rt)
     {
         const char *str = s.c_str();
         os<<str<<std::endl;
         if(--count==0) break;
-    }
-    os<<"end"<<std::endl;
+    }*/
+    os<<"end"<<endl;
 }
 
 void showCorrespondingResults(StringList &rt, std::ostream &os, size_t count)
