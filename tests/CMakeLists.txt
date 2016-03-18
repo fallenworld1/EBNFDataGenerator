@@ -20,6 +20,7 @@ set(INCLUDE_DIRS ../src $ENV{THRDPARTY}/include)
 #add_library(gtest_main STATIC IMPORTED)
 #set_property(TARGET gtest_main PROPERTY IMPORTED_LOCATION $ENV{THRDPARTY}/lib/libgtest_main.a)
 # generator
+
 set(GTEST_ROOT  $ENV{THRDPARTY}/gtest)
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
