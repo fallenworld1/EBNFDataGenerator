@@ -22,4 +22,7 @@ file (GLOB SOURCES ${SOURCES})
 
 add_library(${TARGET_NAME} STATIC ${SOURCES})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+#gnu require explicit flag c++11, msvc not
+if(${CMAKE_COMPILER_IS_GNUCXX})
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif()

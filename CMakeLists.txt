@@ -17,5 +17,7 @@ add_subdirectory(src)
 
 add_executable       (${TARGET_NAME} ${SOURCES})
 target_link_libraries(${TARGET_NAME} DataGenerator)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+#gnu require explicit flag c++11, msvc not
+if(${CMAKE_COMPILER_IS_GNUCXX})
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif()

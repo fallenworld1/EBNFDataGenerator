@@ -38,6 +38,8 @@ add_executable       (${TARGET_NAME} ${SOURCES})
 target_link_libraries(${TARGET_NAME} ${GTEST_BOTH_LIBRARIES})
 target_link_libraries(${TARGET_NAME} DataGenerator)
 
-# google test require -pthread
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
-
+#google test require -pthread
+#gnu require explicit flag c++11, msvc not
+if(${CMAKE_COMPILER_IS_GNUCXX})
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+endif()
