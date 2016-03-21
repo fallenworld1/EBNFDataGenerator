@@ -113,7 +113,7 @@ TEST_F(ServiceClass,figureBraceTokenTest)
     std::string message;
     ASSERT_THROW(fbt.proc(result), DGException) << "Childs not set";
     ASSERT_THROW(fbt.preCount(), DGException) << "Childs not set";
-    tested.emplace_back("");
+   // tested.emplace_back("");
     tt1->proc(tested);
 
     auto str = tested.back(), inserted = str;

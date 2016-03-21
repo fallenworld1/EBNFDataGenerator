@@ -1,5 +1,6 @@
 #ifndef ROUTINES_H
 #define ROUTINES_H
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <algorithm>
 #include <exception>
@@ -50,17 +51,31 @@ class DGException: public std::exception
         return what_.c_str();
     }
 public:
-
+    /*!
+      * \brief creates DGException with string \a word
+      * \param [in] word error message
+      */
     DGException(const std::string &word):what_(word){}
+    /*!
+      * \brief creates DGException with string \a word <\a lit >
+      * \param [in] word error message
+      * \param [in] lit wrong literal
+      */
     DGException(const char *word, const char lit):what_(word)
     {
         char str[4] = "< >";
         str[1] = lit;
         what_.append(str);
     }
+    /*!
+      * \brief creates DGException with string \a word <\a lit > at \a offset
+      * \param [in] word error message
+      * \param [in] lit wrong literal
+      * \param [in] offset position of wrong literal
+      */
      DGException(const char *word, const char lit, size_t offset):what_(word)
      {
-         char str[10] = "< >";
+         char str[21] = "< >";//max digits amount in size_t - 19
          str[1] = lit;
          what_.append(str);
          what_.append(" at ");

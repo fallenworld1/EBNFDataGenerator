@@ -56,24 +56,31 @@ void loadDictionaryFromFile(const std::string &fileName, StringList &dictionary)
     using namespace std;
 
     ifstream ifs(fileName);
-    string word;
+   // string word;
+    char buf[1024];
     while(!ifs.eof())
     {
-        ifs>>word;
-        dictionary.emplace_back(move(word));
+        ifs.getline(buf,1023);
+     //   buf[ifs.gcount()-2]=0;//position of \n symbol
+        dictionary.emplace_back(buf);
     }
 }
 
 void showResults(const StringList &rt, std::ostream &os, size_t count)
 {
     using namespace std;
-    os<<"results("<<count<<")\n";
-    auto b = begin(rt),e = end(rt);
+
+
     size_t step = rt.size()/count;
     if(step==0) ++step;
-    for(;b<e;b+=step)
+     os<<"results("<<min(count,rt.size())<<")\n";
+    auto b = begin(rt),e = end(rt)-step;
+
+    for(;b<=e;b+=step)
     {
          os<<b->c_str()<<endl;
+         if(--count == 0)
+             break;
 
     }
     /*for(auto &s:rt)

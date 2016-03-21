@@ -1,7 +1,7 @@
 #include "tokens.h"
 #include "tree.h"
 
-size_t BaseToken::FigureBraceRepeatCount=   BaseToken::DefaultFigureBraceRepeatCount;
+//size_t BaseToken::FigureBraceRepeatCount=   BaseToken::DefaultFigureBraceRepeatCount;
 size_t BaseToken::MaxConcatenationDepth =   BaseToken::DefaultMaxConcatenationDepth;
 size_t BaseToken::MaxRecursionDepth     =   BaseToken::DefaultMaxRecursionDepth;
 size_t BaseToken::FigureBraceStep       =   BaseToken::DefaultFigureBraceStep;
@@ -30,27 +30,34 @@ void ConcatToken::proc(StringList &rt)
         rt.insert(end(rt),begin(lr),end(lr));
         return;
     }
-    map<size_t,size_t> wordsLength;
-   // size_t iterCount = max(rr.size(),lr.size());
+    map<size_t,size_t> wordsLength;//maps wordsLength to count of this words
+    size_t iterCountDefault = max(rr.size(),lr.size()), stepCount = MaxConcatenationDepth;
+    if(stepCount>iterCountDefault)stepCount=1;
 
 
-    /*auto lrIt = begin(lr),lrBegin = begin(lr),lrEnd = end(lr),rrIt = begin(rr),rrBegin = begin(rr),rrEnd = end(rr);
-    while(iterCount-->0)
+    auto lrBegin = begin(lr),lrEnd = end(lr),rrBegin = begin(rr),rrEnd = end(rr);
+    while(stepCount-->0)
     {
-        auto &l = wordsLength[lrIt->size()+rrIt->size()];
-        ++l;
-        if(l<=verticalControl+MaxConcatenationDepth) rt.push_back(move(*lrIt+*rrIt));
-        if(++lrIt == lrEnd) lrIt = lrBegin;
-        if(++rrIt == rrEnd) rrIt = rrBegin;
+        auto lrIt = lrBegin + rand() % lr.size(),
+                rrIt = rrBegin + rand() % rr.size();
+        size_t iterCount = iterCountDefault;
+        while(iterCount-->0)
+        {
+            auto &l = wordsLength[lrIt->size()+rrIt->size()];
+            ++l;
+            if(l<=verticalControl+MaxConcatenationDepth) rt.push_back(move(*lrIt+*rrIt));
+            if(++lrIt == lrEnd) lrIt = lrBegin;
+            if(++rrIt == rrEnd) rrIt = rrBegin;
 
-    }*/
-    for(auto &le:lr)
+        }
+    }
+    /*for(auto &le:lr)
         for(auto &re:rr)
         {
             auto &l = wordsLength[le.size()+re.size()];
             ++l;
             if(l<=verticalControl+MaxConcatenationDepth) rt.push_back(move(le+re));
-        }
+        }*/
 }
 
 
@@ -68,7 +75,7 @@ void FigureBraceToken::proc(StringList &rt)
     
     
     string tempStr;							 ///stacked elements
-    rt.push_back("");						 ///{} represens 0(!) or more elements
+    //rt.push_back("");						 ///{} represens 0(!) or more elements
     rt.insert(end(rt),begin(temp),end(temp));///1element
     while(addingCount<iterationCount)
     {
@@ -119,7 +126,7 @@ void BaseToken::increaseRanges()
 {
     ++MaxConcatenationDepth;
     ++FigureBraceDepth;
-    ++FigureBraceRepeatCount;
+    //++FigureBraceRepeatCount;
     if(FigureBraceStep>1)--FigureBraceStep;
     //++MaxRecursionDepth;
 }
@@ -128,7 +135,7 @@ void BaseToken::increaseRanges()
 void BaseToken::decreaseRanges()
 {
     if(MaxConcatenationDepth>DefaultMaxConcatenationDepth+2)--MaxConcatenationDepth;
-    if(FigureBraceRepeatCount>DefaultFigureBraceRepeatCount)--FigureBraceRepeatCount;
+    //if(FigureBraceRepeatCount>DefaultFigureBraceRepeatCount)--FigureBraceRepeatCount;
     //if(MaxRecursionDepth>DefaultMaxRecursionDepth)--MaxRecursionDepth;
     if(FigureBraceDepth>DefaultFigureBraceDepth)--FigureBraceDepth;
     ++FigureBraceStep;
@@ -146,10 +153,10 @@ void OrToken::proc(StringList &rt)
         auto begin = std::begin(children_);
         std::for_each(std::begin(probabilities_),std::end(probabilities_), //probabilities_.size() <= children_.size()
                       [&](int prob)
-                                  {
-                                    if(rand()%100 < prob) (*begin)->proc(rt);
-                                    ++begin;
-                                  }
+        {
+            if(rand()%100 < prob) (*begin)->proc(rt);
+            ++begin;
+        }
         );
         std::for_each(begin,std::end(children_),[&](BasePtr &child){child->proc(rt);});
 
@@ -162,7 +169,17 @@ size_t OrToken::preCount()
     if (children_.size()>=2)
     {
         size_t result = 0;
-        for(auto &c:children_) result+=c->preCount();
+        //for(auto &c:children_) result+=c->preCount();
+        //return result;
+        auto begin = std::begin(children_);
+        std::for_each(std::begin(probabilities_),std::end(probabilities_), //probabilities_.size() <= children_.size()
+                                                           [&](int prob)
+                                                               {
+                                                                result+=(*begin)->preCount()*100/prob;
+                                                                ++begin;
+                                                               }
+                                     );
+        std::for_each(begin,std::end(children_),[&](BasePtr &child){result+=child->preCount();});
         return result;
     }
     else throw DGException("args not set in OrToken");

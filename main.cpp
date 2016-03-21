@@ -13,24 +13,25 @@ class DictionarySizePolicy:public AddingPolicy
     size_t lastAddedCount_ = 0;
     size_t percentage_ = 0;
 public:
-     DictionarySizePolicy(size_t percentage):percentage_(percentage){}
+    DictionarySizePolicy(size_t percentage):percentage_(percentage){}
 
-     void update(const StringList &dictionary) override
-     {
-         addingAmount_ = dictionary.size()*percentage_/100;
-     }
-     virtual bool check(const std::string &elem)
-     {
-         if(lastAddedCount_<addingAmount_)
-         {
-             ++lastAddedCount_;
-             return true;
-         }
-     }
-     virtual void refresh()
-     {
-       lastAddedCount_ = 0;
-     }
+    void update(const StringList &dictionary) override
+    {
+        addingAmount_ = dictionary.size()*percentage_/100;
+    }
+    virtual bool check(const std::string &elem)
+    {
+        if(lastAddedCount_<addingAmount_)
+        {
+            ++lastAddedCount_;
+            return true;
+        }
+        return false;
+    }
+    virtual void refresh()
+    {
+        lastAddedCount_ = 0;
+    }
 };
 
 
@@ -49,117 +50,139 @@ void readEBNF(const std::string &filename, std::string &grammar)
         grammar.append(" ");
     }
 }
-void readAndSetSettings(const std::string &filename, Generator &g)
+class SettingsReader
 {
-    using namespace std;
-    ifstream ifs(filename);
-    char data[1024];
-    while(ifs.getline(data,1024))
+    //using namespace std;
+    using str = std::istream_iterator<std::string>;
+    std::string str_;
+    std::istream_iterator<std::string> it,end;
+
+    str getNext ()
     {
-        if(data[0]==0)continue;
-        string str(data);
-        istringstream command(str);
-        auto it = istream_iterator<string>(command);
-        auto end = istream_iterator<string>();
-
-        if(*it=="probabilities")
-        {
-
-            if(++it==end) throw runtime_error("Wrong command: "+str);
-            string tokenName = *it;
-            if(++it==end) throw runtime_error("Wrong command: "+str);
-            size_t operatorNum = atoi(it->c_str());
-            list<int> probabilities;
-            while(++it!=end) probabilities.push_back(atoi(it->c_str()));
-
-            g.setOrTokensProbabilities(tokenName,operatorNum,probabilities);
-
-        }
-        else if(*it=="probability")
-        {
-            if(++it==end) throw runtime_error("Wrong command: "+str);
-            string tokenName = *it;
-            if(++it==end) throw runtime_error("Wrong command: "+str);
-            size_t operatorNum = atoi(it->c_str());
-            int probability;
-            if(++it==end) throw runtime_error("Wrong command: "+str);
-            probability = atoi(it->c_str());
-            g.setSquareBraceProbability(tokenName,operatorNum,probability);
-
-        }
-        else if(*it=="main")
-        {
-            if(++it==end) throw runtime_error("Wrong command: "+str);
-            g.setMainTokenName(*it);
-        }
-        else if(*it=="dictionary")
-        {
-            if(++it==end) throw runtime_error("Wrong command: "+str);
-            string tokenName = *it;
-            if(++it==end) throw runtime_error("Wrong command: "+str);
-            StringList dictionary;
-            if(*it=="load")
-            {
-                if(++it==end) throw runtime_error("Wrong command: "+str);
-                routines::loadDictionaryFromFile(*it,dictionary);
-            }
-            else if(*it=="set")
-            {
-                while(++it!=end) dictionary.push_back(*it);
-            }
-            else throw runtime_error("Wrong command: "+str);
-            if(tokenName == "all") g.setDictionary(dictionary);
-            else g.setDictionary(tokenName, dictionary);
-
-        }
-        else if(*it=="policy")
-        {
-            if(++it==end) throw runtime_error("Wrong command: "+str);
-            string tokenName = *it;
-            if(++it==end) throw runtime_error("Wrong command: "+str);
-            PolicyPtr policy;
-            if(*it=="DefaultPolicy")
-            {
-                policy = std::make_shared<DefaultPolicy>();
-            }
-            else if(*it=="MinMaxDPolicy")
-            {
-                policy = std::make_shared<MinMaxDPolicy>();
-            }
-            else if(*it=="MinMaxPolicy")
-            {
-                if(++it==end) throw runtime_error("Wrong command: "+str);
-                size_t min = atoi(it->c_str());
-                if(++it==end) throw runtime_error("Wrong command: "+str);
-                size_t max = atoi(it->c_str());
-                policy = std::make_shared<MinMaxPolicy>(min,max);
-            }
-            else if(*it=="NearAveragePolicy")
-            {
-                if(++it==end) throw runtime_error("Wrong command: "+str);
-                size_t min = atof(it->c_str());
-                if(++it==end) throw runtime_error("Wrong command: "+str);
-                size_t max = atof(it->c_str());
-                policy = std::make_shared<MinMaxPolicy>(min,max);
-            }
-            else if(*it=="DictionarySizePolicy")
-            {
-                if(++it==end) throw runtime_error("Wrong command: "+str);
-                policy = std::make_shared<DictionarySizePolicy>(atoi(it->c_str()));
-            }
-            else throw runtime_error("Wrong command: "+str);
-            if(tokenName == "all") g.setAddingPolicy(policy);
-            else g.setAddingPolicy(tokenName, policy);
-        }
-        else throw runtime_error("Wrong command: "+str);
-
+        if(++it==end) throw std::runtime_error("Wrong command: "+str_);
+        else return it;
     }
-}
-void storeResults(const std::string &filename, const StringList &results, size_t size=0)
+    void getNext (size_t &next)
+    {
+        if(++it==end) throw std::runtime_error("Wrong command: "+str_);
+        else next = static_cast<size_t>(atoi(it->c_str()));
+    }
+    void getNext (double &next)
+    {
+        if(++it==end) throw std::runtime_error("Wrong command: "+str_);
+        else next = atof(it->c_str());;
+    }
+public:
+
+    void readAndSetSettings(const std::string &filename, Generator &g)
+    {
+        using namespace std;
+        ifstream ifs(filename);
+        char data[1024];
+        while(ifs.getline(data,1024))
+        {
+            if(data[0]==0)continue;
+            str_ = data;
+            istringstream parser(str_);
+            it = str(parser);
+            end = str();
+            str command = it;
+            if(command->front() == '#') continue;
+            str tokenName = getNext();
+
+            if(*command=="probabilities")
+            {
+                size_t operatorNum;
+                getNext(operatorNum);
+                list<int> probabilities;
+                while(++it!=end) probabilities.push_back(atoi(it->c_str()));
+                g.setOrTokensProbabilities(*tokenName,operatorNum,probabilities);
+
+            }
+            else if(*command=="probability")
+            {
+                size_t operatorNum;
+                getNext(operatorNum);
+                size_t probability;
+                getNext(probability);
+                g.setSquareBraceProbability(*tokenName,operatorNum,(int)probability);
+
+            }
+            else if(*command=="main")
+            {
+                g.setMainTokenName(*tokenName);
+            }
+            else if(*command=="dictionary")
+            {
+                str type = getNext();
+                StringList dictionary;
+                if(*type=="load")
+                {
+                    str filename = getNext();
+                    routines::loadDictionaryFromFile(*filename,dictionary);
+                }
+                else if(*type=="set")
+                {
+                    while(++it!=end) dictionary.push_back(*it);
+                }
+                else if(*type=="pregenerate")
+                {
+                    size_t count;
+                    getNext(count);
+                    g.generate(*tokenName,count);
+                    dictionary = g.getResults();
+                }
+                else throw runtime_error("Wrong command: "+str_);
+                if(*tokenName == "all") g.setDictionary(dictionary);
+                else g.setDictionary(*tokenName, dictionary);
+
+            }
+            else if(*command=="policy")
+            {
+                str type = getNext();
+                PolicyPtr policy;
+                if(*type=="DefaultPolicy")
+                {
+                    policy = std::make_shared<DefaultPolicy>();
+                }
+                else if(*type=="MinMaxDPolicy")
+                {
+                    policy = std::make_shared<MinMaxDPolicy>();
+                }
+                else if(*type=="MinMaxPolicy")
+                {
+
+                    size_t min,max;
+                    getNext(min);
+                    getNext(max);
+                    policy = std::make_shared<MinMaxPolicy>(min,max);
+                }
+                else if(*type=="NearAveragePolicy")
+                {
+                    double avrg;
+                    getNext(avrg);
+                    policy = std::make_shared<NearAveragePolicy>(avrg);
+                }
+                else if(*type=="DictionarySizePolicy")
+                {
+                    size_t mul;
+                    getNext(mul);
+                    policy = std::make_shared<DictionarySizePolicy>((mul));
+                }
+                else throw runtime_error("Wrong command: "+str_);
+                if(*tokenName == "all") g.setAddingPolicy(policy);
+                else g.setAddingPolicy(*tokenName, policy);
+            }
+            else throw runtime_error("Wrong command: "+str_);
+
+        }
+    }
+};
+void storeResults(const std::string &filename, StringList &results, size_t size=0)
 {
     std::ofstream ofs(filename);
     if(size==0) size = results.size();
-    routines::showResults(results,ofs,size);
+    routines::showCorrespondingResults(results,ofs,size);
 }
 
 int main(int argc, char **argv)
@@ -171,10 +194,10 @@ int main(int argc, char **argv)
         Generator generator;
         Parser parser;
         std::string grammar;
-
+        SettingsReader r;
         readEBNF("input",grammar);
         generator.getTokens(grammar,parser);
-        readAndSetSettings("settings",generator);
+        r.readAndSetSettings("settings",generator);
         size_t count=0;
         int attemts=-1;
         if(argc == 2)
@@ -183,7 +206,8 @@ int main(int argc, char **argv)
             attemts = 100;
         }
         generator.generate(count,attemts);
-        storeResults("output",generator.getResults(),count);
+        auto results = generator.getResults();
+        storeResults("output",results,count);
 
     }
     catch(exception &e)

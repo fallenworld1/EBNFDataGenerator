@@ -1,5 +1,7 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "parser.h"
 
 

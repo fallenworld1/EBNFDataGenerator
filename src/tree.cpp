@@ -102,7 +102,7 @@ void Tree::buildTree(const string &expr, ConstStrIt &begin)
                 name_ = customTokens_.back()->name();
                 //canChange_=false;
                 break;
-            case TOKENS_DELIMETR:
+            case TOKENS_DELIMETR1: case TOKENS_DELIMETR2:
                 ++begin;
                 treeValid_ = true;
                 top_ = current;

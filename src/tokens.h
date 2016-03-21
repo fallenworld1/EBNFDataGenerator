@@ -1,6 +1,7 @@
 #ifndef BASETOKEN_H
 #define BASETOKEN_H
 
+
 #include "routines.h"
 #include "defines.h"
 #include <list>
@@ -14,7 +15,7 @@ class BaseToken
     //static int Count_;
 protected:
 
-    static size_t FigureBraceRepeatCount;
+    //static size_t FigureBraceRepeatCount;
     static size_t MaxConcatenationDepth;
     static size_t FigureBraceDepth;
     static size_t MaxRecursionDepth;
@@ -220,7 +221,8 @@ public:
     void proc(StringList &rt) override ;
     size_t preCount() override
     {
-        if (left_ && right_) return right_->preCount() * left_->preCount(); //std::max(right_->preCount(), left_->preCount());
+        if (left_ && right_) return //right_->preCount() * left_->preCount();
+                                   std::max(right_->preCount(), left_->preCount()) * MaxConcatenationDepth;
         else throw DGException("args not set in ConcatToken");
     }
     bool checkType(char c) const override {return c==',';}
@@ -267,7 +269,7 @@ public:
     void proc(StringList &rt) override;
     size_t preCount() override
     {
-        if (child_) return child_->preCount() + 1;
+        if (child_) return child_->preCount()*probability_/100 + 1;
         else throw DGException("Arg child_ not set in SquareBraceToken");
     }
     bool checkType(char c) const override {return c==']'||c=='[';}
