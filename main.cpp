@@ -6,7 +6,9 @@
 
 #include "src/generator.h"
 #include <chrono>
-
+/*!
+ * \brief The DictionarySizePolicy class adds dictionary.size()*percentage_ elements
+ */
 class DictionarySizePolicy:public AddingPolicy
 {
     size_t addingAmount_ = 0;
@@ -34,7 +36,11 @@ public:
     }
 };
 
-
+/*!
+ * \brief readEBNF read file \a filename and store all to \a grammar
+ * \param [in] filename file with data
+ * \param [out] grammar readed data
+ */
 void readEBNF(const std::string &filename, std::string &grammar)
 {
     using namespace std;
@@ -50,6 +56,9 @@ void readEBNF(const std::string &filename, std::string &grammar)
         grammar.append(" ");
     }
 }
+/*!
+ * \brief The SettingsReader class reads file and process settings
+ */
 class SettingsReader
 {
     //using namespace std;
@@ -73,7 +82,11 @@ class SettingsReader
         else next = atof(it->c_str());;
     }
 public:
-
+    /*!
+     * \brief Reads Settings from \a filename  And Sets it to \a g
+     * \param [in] filename name of file to read
+     * \param [in] g generator to tune
+     */
     void readAndSetSettings(const std::string &filename, Generator &g)
     {
         using namespace std;
@@ -178,6 +191,12 @@ public:
         }
     }
 };
+/*!
+ * \brief store Results to file \a filename
+ * \param [in] filename name of file to store
+ * \param [in] results container with results to store
+ * \param [in] size amoun of results to store
+ */
 void storeResults(const std::string &filename, StringList &results, size_t size=0)
 {
     std::ofstream ofs(filename);
@@ -195,9 +214,9 @@ int main(int argc, char **argv)
         Parser parser;
         std::string grammar;
         SettingsReader r;
-        readEBNF("input",grammar);
-        generator.getTokens(grammar,parser);
-        r.readAndSetSettings("settings",generator);
+        readEBNF("input",grammar);                  ///reads all data from file named input
+        generator.getTokens(grammar,parser);        /// generates tokens by parser and store it to generator
+        r.readAndSetSettings("settings",generator); ///apply settings from file settings
         size_t count=0;
         int attemts=-1;
         if(argc == 2)
@@ -205,9 +224,9 @@ int main(int argc, char **argv)
             count = static_cast<size_t>(atoi(argv[1]));
             attemts = 100;
         }
-        generator.generate(count,attemts);
+        generator.generate(count,attemts);         ///generates at least(if possible) count of tokens
         auto results = generator.getResults();
-        storeResults("output",results,count);
+        storeResults("output",results,count);      ///store results to file output
 
     }
     catch(exception &e)
