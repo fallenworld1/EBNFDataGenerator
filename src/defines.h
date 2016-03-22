@@ -19,8 +19,8 @@ using BasePtr = std::shared_ptr<BaseToken>;
 using TreePtr = std::shared_ptr<Tree> ;
 
 using TreesContainer = std::map<std::string,TreePtr>;
-using StringList =     std::deque<std::string>;
-using PolicyPtr =      std::shared_ptr<AddingPolicy>;
+using StringList     = std::deque<std::string>;
+using PolicyPtr      = std::shared_ptr<AddingPolicy>;
 
 
 #endif // DEFINES

@@ -1,4 +1,5 @@
 #include "tree.h"
+#include "treebuilder.h"
 #include <gtest/gtest.h>
 
 
@@ -16,64 +17,75 @@ TEST(TreeTests, EmptyTreeTest)
     ASSERT_TRUE(n.empty());
 
 }
-TEST(TreeTests, SimpleSuccessParsingTest)
+TEST(TreeBuilderTests, SimpleSuccessParsingTest)
 {
-    Tree tree;
+    TreeBuilder builder;
+    TreePtr tree;
     std::string expr;
     auto it = expr.cbegin();
-    ASSERT_THROW(tree.buildTree(expr,it),routines::DGException);
+    ASSERT_THROW(builder.buildTree(expr,it),routines::DGException);
     expr = "  #comment#  main    =    \"1\"\t\t;";
     it = expr.cbegin();
-    tree.buildTree(expr,it);
+    tree = builder.buildTree(expr,it);
     //ASSERT_FALSE(tree.canChange());
     ASSERT_EQ(it,expr.end());
-    tree.generate(true);
-    auto r = tree.getResults();
+    tree->generate(true);
+    auto r = tree->getResults();
     ASSERT_EQ(r.size(),1);
     ASSERT_EQ(r[0],"1");
-    auto t = tree.getCustomTokensList();
+    auto t = tree->getCustomTokensList();
     ASSERT_EQ(t.size(),1);
-    auto n = tree.name();
+    auto n = tree->name();
     ASSERT_EQ(n,"main");
 
 
 
 }
-TEST(TreeTests, SimpleFailParsingTest)
+TEST(TreeBuilderTests, SimpleFailParsingTest)
 {
     using namespace std;
-    auto test = [](Tree &tree, const std::string &error,const std::string &errorString)
+    TreeBuilder builder;
+    auto test = [&](const std::string &error,const std::string &errorString)
     {
         try
         {
             auto it = error.cbegin();
-            tree.buildTree(error,it);
+            builder.buildTree(error,it);
         }
         catch(exception &e)
         {
             ASSERT_EQ(string(e.what()),errorString)<<"Exception string test";
-            ASSERT_FALSE(tree.isValid())<<"Tree::buildTree error. Tree valid after exception";
+            //ASSERT_FALSE(tree.isValid())<<"Tree::buildTree error. Tree valid after exception";
+            return;
         }
+        FAIL()<<"Exception not thrown. Error string: "<<error;
     };
 
 
-    Tree tree;
-    test(tree, "main",      "Tree::buildTree error. Unexpected end of string."        );
-    test(tree, "main main=","Tree::buildTree error. Wrong syntax near main"           );
-    test(tree, "main=main=","Tree::buildTree error. Unexpected occurence of: <=> at 9");
-    test(tree, "(}",        "Tree::buildTree error. Wrong closing brace: <}> at 1"    );
-    test(tree, "*",         "Tree::buildTree error. Wrong literal: <*> at 0"          );
-    //test(tree, "*",         "Tree::buildTree error. Wrong literal: <*> at 0"          );
+    test("main",                "Tree::buildTree error. Unexpected end of string < > at 4"            );
+    test("m_a_i_n main=",       "Tree::buildTree error. Unexpected occurence of: <m> at 8"    );
+    test("main=main=",          "Tree::buildTree error. Unexpected occurence of: <=> at 9"    );
+    test("(}",                  "Tree::buildTree error. Unexpected occurence of: <}> at 1"    );
+    test("()",                  "Tree::buildTree error. Unexpected occurence of: <)> at 1"    );
+    test("(abc}",               "Tree::buildTree error. Wrong closing brace: <}> at 4"        );
+    test("(abc))",              "Tree::buildTree error. Unexpected closing brace: <)> at 5"   );
+    test("a = ((abc);",         "Tree::buildTree error. Unterminated brace in string<(> at 10");
+    test("*",                   "Tree::buildTree error. Wrong literal in token name: <*> at 0");
+    test("main=\"nnn;",         "routines::readLiteralName error. Unexpected end of string."  );
+    test("| main = k;",         "Tree::buildTree error. Unexpected occurence of: <|> at 0"    );
+    test("main = custom\"ll\"", "Tree::buildTree error. Unexpected occurence of: <\"> at 16"  );
+
 }
 TEST(TreeTests, GeneratingTest)
 {
-    Tree tree;
-    std::string expr = "a={[\"1\"]|[\"2\"]};";
+    TreePtr tree;
+    TreeBuilder builder;
+    std::string expr = "a={[\"1\"]|[\"2\"]};   ";
     auto it = expr.cbegin();
-    tree.buildTree(expr,it);
-    ASSERT_TRUE(tree.isValid());
-    tree.generate(true);
-    auto results = tree.getResults();
+    tree=builder.buildTree(expr,it);
+    ASSERT_TRUE(tree->isValid());
+    tree->generate(true);
+    auto results =tree->getResults();
     ASSERT_GE(results.size(),4);
     for(auto &r:results){
         ASSERT_TRUE((r.empty()
@@ -85,18 +97,18 @@ TEST(TreeTests, GeneratingTest)
     StringList dictionary;
     dictionary.emplace_back("3");
     dictionary.emplace_back("4");
-    tree.setDictionary(dictionary);
-    ASSERT_TRUE(tree.isValid());
-    tree.generate(true);
-    results = tree.getResults();
+    tree->setDictionary(dictionary);
+    ASSERT_TRUE(tree->isValid());
+    tree->generate(true);
+    results =tree->getResults();
     auto end = std::end(results);
     for(auto &d:dictionary){
         ASSERT_FALSE(std::find(std::begin(results),end,d) == end);
     }
-    tree.setPolicy(std::make_shared<MinMaxPolicy>(0,2));
-    ASSERT_TRUE(tree.isValid());
-    tree.generate(true);
-    results = tree.getResults();
+    tree->setPolicy(std::make_shared<MinMaxPolicy>(0,2));
+    ASSERT_TRUE(tree->isValid());
+    tree->generate(true);
+    results =tree->getResults();
     end = std::end(results);
     for(auto &d:dictionary){
         ASSERT_FALSE(std::find(std::begin(results),end,d) == end);
@@ -104,34 +116,35 @@ TEST(TreeTests, GeneratingTest)
     for(auto &r:results){
         ASSERT_LE(r.size(),2);
     }
-    expr ="a=\"1\",\"2\"|\"3\";";
+    expr ="a=\"1\",\"2\"|\"3\";  ";
     it = expr.cbegin();
-    tree.buildTree(expr,it);
-    tree.generate(true);
-    results = tree.getResults();
+    tree = builder.buildTree(expr,it);
+    tree->generate(true);
+    results =tree->getResults();
     ASSERT_EQ(results[0],"12");
     ASSERT_EQ(results[1],"3");
 }
 TEST(TreeTests, CustomTokenTest)
 {
-	TreePtr tree= std::make_shared<Tree>();
-	StringList result,expect;
-	std::string expr = "a=\"1\"|\"2\";";
+    TreePtr tree;
+    TreeBuilder builder;
+    StringList result,expect;
+    std::string expr = "a=\"1\"|\"2\";";
     auto it = expr.cbegin();
-    tree->buildTree(expr,it);
-	CustomToken ct("main",nullptr);
-	ASSERT_THROW(ct.proc(result), DGException) << "Childs not set";
-	ASSERT_THROW(ct.preCount(), DGException) << "Childs not set";
-	ASSERT_FALSE(ct.checkType('s'));
-	ASSERT_FALSE(ct.checkChildType('s'));
-	ASSERT_EQ(ct.name(), "main");
-	ct.setMain(tree);
-	ASSERT_EQ(ct.preCount(), tree->preCount());
-	tree->generate(true);
-	expect = tree->getResults();
-	ct.proc(result);
-	ASSERT_EQ(result.size(), expect.size());
-	for (int i = 0; i < result.size(); ++i)
-		ASSERT_EQ(result[i], expect[i]);
+    tree = builder.buildTree(expr,it);
+    CustomToken ct("main",nullptr);
+    ASSERT_THROW(ct.proc(result), DGException) << "Childs not set";
+    ASSERT_THROW(ct.preCount(), DGException) << "Childs not set";
+    ASSERT_FALSE(ct.checkType('s'));
+    ASSERT_FALSE(ct.checkChildType('s'));
+    ASSERT_EQ(ct.name(), "main");
+    ct.setMain(tree);
+    ASSERT_EQ(ct.preCount(), tree->preCount());
+    tree->generate(true);
+    expect = tree->getResults();
+    ct.proc(result);
+    ASSERT_EQ(result.size(), expect.size());
+    for (int i = 0; i < result.size(); ++i)
+        ASSERT_EQ(result[i], expect[i]);
 }
 

@@ -118,7 +118,10 @@ public:
     CustomToken(const std::string &name, TreePtr mt):tree_(mt),name_(name),recurseDepth_(0){/*save();*/}
     const std::string& name(){return name_;}
     void setMain(TreePtr mt){tree_=mt;}
-    void setChild(BasePtr) override {}
+    void setChild(BasePtr) override
+    {
+        throw DGException("Wrong syntax near custom token"+name_);
+    }
     void resetChild(BasePtr) override {}
     void proc(StringList &rt) override ;
     /*!
@@ -351,6 +354,30 @@ public:
     ~TopTokenGuard()
     {
         top_ = tt_->child();
+    }
+};
+class InitToken:public BaseToken
+{
+    void proc(StringList &) override
+    {
+        throw DGException("Token name missed");
+    }
+    size_t preCount() override
+    {
+        throw DGException("Token name missed");
+    }
+    bool checkType(char ) const override
+    {
+        throw DGException("Token name missed");
+    }
+    virtual void setChild(BasePtr child)override
+    {
+         throw DGException("Token name missed");
+    }
+
+    virtual void resetChild(BasePtr other)
+    {
+         throw DGException("Token name missed");
     }
 };
 

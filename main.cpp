@@ -5,36 +5,7 @@
 #include <iterator>
 
 #include "src/generator.h"
-#include <chrono>
-/*!
- * \brief The DictionarySizePolicy class adds dictionary.size()*percentage_ elements
- */
-class DictionarySizePolicy:public AddingPolicy
-{
-    size_t addingAmount_ = 0;
-    size_t lastAddedCount_ = 0;
-    size_t percentage_ = 0;
-public:
-    DictionarySizePolicy(size_t percentage):percentage_(percentage){}
 
-    void update(const StringList &dictionary) override
-    {
-        addingAmount_ = dictionary.size()*percentage_/100;
-    }
-    virtual bool check(const std::string &elem)
-    {
-        if(lastAddedCount_<addingAmount_)
-        {
-            ++lastAddedCount_;
-            return true;
-        }
-        return false;
-    }
-    virtual void refresh()
-    {
-        lastAddedCount_ = 0;
-    }
-};
 
 /*!
  * \brief readEBNF read file \a filename and store all to \a grammar

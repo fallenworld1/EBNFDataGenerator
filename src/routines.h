@@ -50,6 +50,16 @@ class DGException: public std::exception
     {
         return what_.c_str();
     }
+    void setUnitPos(const char lit, size_t offset)
+    {
+        char str[21] = "< >";//max digits amount in size_t - 19
+        str[1] = lit;
+        what_.append(str);
+        what_.append(" at ");
+        sprintf(str,"%d",(int)offset);
+        what_.append(str);
+    }
+
 public:
     /*!
       * \brief creates DGException with string \a word
@@ -75,12 +85,12 @@ public:
       */
      DGException(const char *word, const char lit, size_t offset):what_(word)
      {
-         char str[21] = "< >";//max digits amount in size_t - 19
-         str[1] = lit;
-         what_.append(str);
-         what_.append(" at ");
-         sprintf(str,"%d",(int)offset);
-         what_.append(str);
+         setUnitPos(lit,offset);
+     }
+     DGException(std::string &&word, const char lit, size_t offset)
+     {
+         what_.swap(word);
+         setUnitPos(lit,offset);
      }
 };
 

@@ -10,31 +10,10 @@
  */
 class Tree
 {
-    // friend class TreeBuilder;
-    enum Literals
-    {
-        QUOTES              = '\"',
-        CONCAT              = ',' ,
-        OR                  = '|' ,
-        OPEN_ROUND_BRACE    = '(' ,
-        OPEN_SQUARE_BRACE   = '[' ,
-        OPEN_FIGURE_BRACE   = '{' ,
-        CRBRACE             = ')' ,
-        CSBRACE             = ']' ,
-        CFBRACE             = '}' ,
-        NAME_BODY_DELIMETR  = '=' ,
-        TOKENS_DELIMETR1     = ';' ,
-        TOKENS_DELIMETR2     = '.' ,
-        COMMENT             = '#' ,
-        SPACE               = ' ' ,
-        TAB                 = '\t',
-        CARRIAGE_RETURN_WIN = '\r',
-        CARRIAGE_RETURN     = '\n',
-        UNDERSCORE          = '_'
-    };
+    friend class TreeBuilder;
 
-    using CTContainer =  std::deque<std::shared_ptr<CustomToken> >;///Custom Tokens Container
-    using OTContainer =  std::deque<std::shared_ptr<OrToken> >;///Or     Tokens Container
+    using CTContainer =  std::deque<std::shared_ptr<CustomToken> >;     ///Custom Tokens Container
+    using OTContainer =  std::deque<std::shared_ptr<OrToken> >;         ///Or     Tokens Container
     using SBTContainer = std::deque<std::shared_ptr<SquareBraceToken> >;///[]     Tokens Container
 
     BasePtr      top_;           /// top of this tree
@@ -44,9 +23,10 @@ class Tree
     SBTContainer SBTokens_;      /// vector of all [] tokens in this tree
     std::string  name_;          /// current tree name, for linking
     bool         treeValid_;     /// true if this tree valid(can reproduce results)
-    //bool         canChange_ ;    /// indicates this tree had randomisation in generating
+  //bool         canChange_;     /// indicates this tree had randomisation in generating
     StringList   dictionary_;    /// user defined values this tree can generate
     PolicyPtr    addingPolicy_;  /// what elements add to the results
+
     /*!
      * \brief adjustResults \a rt
      * \param [in/out] rt adjustable results
@@ -79,7 +59,7 @@ public:
      *
      * builds tree from pos \a begin  of \a expr to end(\a expr) or ';'
      */
-    void buildTree(const std::string &expr, ConstStrIt &begin);
+    // void buildTree(const std::string &expr, ConstStrIt &begin);
     // void buildTreeWithBuilder(const std::string &expr, ConstStrIt &begin);
     /*!
      * \brief generate
