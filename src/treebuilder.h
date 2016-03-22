@@ -12,7 +12,7 @@ class TreeBuilder
      *
      * just named literals
      */
-    enum class Literals
+    enum Literals
     {
         QUOTE               = '\"' ,
         CONCAT              = ','  ,
