@@ -71,7 +71,7 @@ void FigureBraceToken::proc(StringList &rt)
     child_->proc(temp);
     if(temp.empty()) return;
     //child_->proc(rt);
-    size_t	addingCount = FigureBraceStep, iterationCount = max(FigureBraceDepth,verticalControl/FigureBraceDepth);				 ///count of stacked element
+    size_t	addingCount = FigureBraceStep, iterationCount = max(FigureBraceDepth,(size_t)verticalControl);				 ///count of stacked element
     
     
     string tempStr;							 ///stacked elements

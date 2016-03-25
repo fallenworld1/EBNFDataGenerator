@@ -151,6 +151,23 @@ void TreeBuilder::processEnd()
     ++it_;
 }
 
+void TreeBuilder::processComment()
+{
+    if(++it_ != end_  &&(Literals)*it_ != Literals::COMMENT)
+        throw DGException("Tree::buildTree error. Unexpected symbol: ",'#',it_-begin_);
+    auto twice = false;
+    while(++it_ != end_ )
+    {
+        if((Literals)*it_ == Literals::COMMENT)
+        {
+            if(twice) break;
+            else twice = true;
+        }
+        else twice = false;
+    }
+
+}
+
 TreePtr TreeBuilder::makeTree()
 {
      TreePtr result = std::make_shared<Tree>();
@@ -178,35 +195,31 @@ std::shared_ptr<Tree> TreeBuilder::buildTree(const std::string &expr, ConstStrIt
 
     while(1)
     {
-
         switch(*it_)
         {
-        case Literals::QUOTE:                                                processQuote(); break;
-        case Literals::CONCAT:                                               processConcat();break;
-        case Literals::OR:                                                   processOR();    break;
-        case Literals::OPEN_ROUND_BRACE:                                     processORB();   break;
-        case Literals::OPEN_SQUARE_BRACE:                                    processOSB();   break;
-        case Literals::OPEN_FIGURE_BRACE:                                    processOFB();   break;
-        case Literals::NAME_BODY_DELIMETR:                                   processEq();    break;
-        case Literals::TOKENS_DELIMETR1:case Literals::TOKENS_DELIMETR2:
+        case Literals::TOKENS_DELIMETR1:
+        case Literals::TOKENS_DELIMETR2:
         {
             processEnd();
             begin  = it_;
             return makeTree();
         }
-        case Literals::CRBRACE:
-        case Literals::CSBRACE:
-        case Literals::CFBRACE:                                              processCB();    break;
-
-        case Literals::SPACE:
-        case Literals::TAB:
+        case Literals::QUOTE              : processQuote();  break;
+        case Literals::CONCAT             : processConcat(); break;
+        case Literals::OR                 : processOR();     break;
+        case Literals::OPEN_ROUND_BRACE   : processORB();    break;
+        case Literals::OPEN_SQUARE_BRACE  : processOSB();    break;
+        case Literals::OPEN_FIGURE_BRACE  : processOFB();    break;
+        case Literals::NAME_BODY_DELIMETR : processEq();     break;
+        case Literals::CRBRACE            :
+        case Literals::CSBRACE            :
+        case Literals::CFBRACE            : processCB();     break;
+        case Literals::SPACE              :
+        case Literals::TAB                :
         case Literals::CARRIAGE_RETURN_WIN:
-        case Literals::CARRIAGE_RETURN:
-            break;
-        case Literals::COMMENT:
-            while(++it_ != end_ && (Literals)*it_ != Literals::COMMENT);
-            break;
-        default:                                                             processName();
+        case Literals::CARRIAGE_RETURN    :                  break;
+        case Literals::COMMENT            : processComment();break;
+        default                           : processName();
         }
         if(++it_ == end_)
         {//we cant get here in normal mode, except situations like ...;...<-spaces

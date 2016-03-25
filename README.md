@@ -12,7 +12,7 @@ optional		[ ... ]
 repetition		{ ... }
 grouping		( ... )
 terminal string	" ... "
-comment			# ... #
+comment			## ... ##
 
 
 To build use cmake or QtCreator;

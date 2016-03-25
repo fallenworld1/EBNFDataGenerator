@@ -81,6 +81,7 @@ private:
     void processName();
     void processEq();
     void processEnd();
+    void processComment();
     TreePtr makeTree();
 public:
     /*!

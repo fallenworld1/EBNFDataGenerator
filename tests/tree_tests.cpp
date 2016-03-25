@@ -24,7 +24,7 @@ TEST(TreeBuilderTests, SimpleSuccessParsingTest)
     std::string expr;
     auto it = expr.cbegin();
     ASSERT_THROW(builder.buildTree(expr,it),routines::DGException);
-    expr = "  #comment#  main    =    \"1\"\t\t;";
+    expr = "  ##comment##  main    =    \"#\"\t\t;";
     it = expr.cbegin();
     tree = builder.buildTree(expr,it);
     //ASSERT_FALSE(tree.canChange());
@@ -32,7 +32,7 @@ TEST(TreeBuilderTests, SimpleSuccessParsingTest)
     tree->generate(true);
     auto r = tree->getResults();
     ASSERT_EQ(r.size(),1);
-    ASSERT_EQ(r[0],"1");
+    ASSERT_EQ(r[0],"#");
     auto t = tree->getCustomTokensList();
     ASSERT_EQ(t.size(),1);
     auto n = tree->name();
@@ -74,6 +74,7 @@ TEST(TreeBuilderTests, SimpleFailParsingTest)
     test("main=\"nnn;",         "routines::readLiteralName error. Unexpected end of string."  );
     test("| main = k;",         "Tree::buildTree error. Unexpected occurence of: <|> at 0"    );
     test("main = custom\"ll\"", "Tree::buildTree error. Unexpected occurence of: <\"> at 16"  );
+    test("#main = custom\"ll\"", "Tree::buildTree error. Unexpected symbol: <#> at 1"  );
 
 }
 TEST(TreeTests, GeneratingTest)

@@ -251,7 +251,7 @@ void Tree::setProbabilities(size_t tokenNumber, const std::list<int> &probabilit
 
 void Tree::setProbability(size_t tokenNumber, int probability)
 {
-    if(SBTokens_.size()<=tokenNumber) throw DGException("Tree::setProbability error. Wrong SquareBraceTokenNumber");
+    if(SBTokens_.size()<=tokenNumber) throw DGException("Tree::setProbability error. Wrong SquareBraceTokenNumber in token "+name_);
     SBTokens_.at(tokenNumber)->setProbability(probability);
 }
 
